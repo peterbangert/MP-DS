@@ -1,0 +1,59 @@
+# Default values
+# Declare variables to be passed into your templates.
+# Variables will overwrite values in each subchart's values.yaml
+
+#######################################
+## Global variables for the flink chart
+flink:
+  ## boolean to enable/disable chart
+  enabled: true
+
+  ## configure number of deployed jobmanagers
+  jobmanager:
+    replicas: 1
+
+  ## configure number of deployed taskmanagers
+  taskmanager:
+    replicas: 3
+
+  ## configure the NodePort for external access
+  ## will be configured automatically if left empty
+  nodePort: 30881
+
+#######################################
+## Global variables for the kafka chart
+kafka:
+  enabled: true
+
+  ## configure cluster size
+  replicas: 3
+
+  ## configure the NodePorts for external access
+  ## Ports in firstListenerPort  advertised.listeners must match
+  ## NodePorts = $(firstListenerPort + replicaNumber)
+  external:
+    firstListenerPort: 31090
+
+  configurationOverrides:
+    "advertised.listeners": |-
+      EXTERNAL://${HOST_IP}:$((31090 + ${KAFKA_BROKER_ID}))
+
+############################################
+## Global variables for the prometheus chart
+prometheus:
+  ## boolean to enable/disable chart
+  enabled: true
+
+  ## configure the NodePort for external access
+  ## will be configured automatically if left empty
+  nodePort: 30090
+
+#########################################
+## Global variables for the grafana chart
+grafana:
+  ## boolean to enable/disable chart
+  enabled: true
+
+  ## configure the NodePort for external access
+  service:
+    nodePort: 30080
