@@ -6,7 +6,7 @@ public class Bin {
 
     Coordinate ulCorner;
     Coordinate lrCorner;
-    Coordinate overlap_lrCorner;
+    Coordinate overlapCorner;
     GridBins grid;
     ArrayList<Person> peopleInBin;
     ArrayList<Person> peopleInOverlap;
@@ -14,6 +14,7 @@ public class Bin {
     public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, GridBins grid){
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
+        overlapCorner = this.lrCorner.addCoordinate(overlapSize);
         this.grid = grid;
     }
 }
