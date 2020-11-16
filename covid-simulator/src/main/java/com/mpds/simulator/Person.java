@@ -1,16 +1,23 @@
 package com.mpds.simulator;
 
+import it.unimi.dsi.util.XorShift1024StarPhiRandom;
+
 public class Person {
 
     int id;
-    int x;
-    int y;
+    Coordinate pos;
     boolean infected;
-    Person(int id){
+    XorShift1024StarPhiRandom randomGen;
+
+    public Person(int id, Coordinate gridSize){
         this.id = id;
-        x = 0;
-        y = 0;
         infected = false;
+        randomGen = new XorShift1024StarPhiRandom();
+
+        pos = new Coordinate(randomGen.nextInt(gridSize.row),
+                randomGen.nextInt(gridSize.col));
     }
+
+
 
 }

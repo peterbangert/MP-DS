@@ -9,8 +9,9 @@ public class Bin {
     Coordinate overlap_lrCorner;
     GridBins grid;
     ArrayList<Person> peopleInBin;
+    ArrayList<Person> peopleInOverlap;
 
-    Bin(Coordinate ulCorner, Coordinate lrCorner, int[] overlapSize, GridBins grid){
+    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, GridBins grid){
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
         this.grid = grid;
