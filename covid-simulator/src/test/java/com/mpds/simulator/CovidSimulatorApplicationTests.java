@@ -44,6 +44,23 @@ class CovidSimulatorApplicationTests {
         Assert.isTrue(grid.bins[6][6].lrCorner.col==21, String.valueOf(grid.bins[6][6].lrCorner.col));
         Assert.isTrue(grid.bins[6][6].overlapCorner.row==21, String.valueOf(grid.bins[6][6].overlapCorner.row));
         Assert.isTrue(grid.bins[6][6].overlapCorner.col==21, String.valueOf(grid.bins[6][6].overlapCorner.col));
+
+        Person p1 = new Person(1, new Coordinate(0,0), size);
+        grid.insertPerson(p1);
+        Assert.isTrue(!grid.bins[0][0].peopleInBin.isEmpty());
+
+        Person p2 = new Person(2, new Coordinate(18, 18), size);
+        grid.insertPerson(p2);
+        Assert.isTrue(!grid.bins[6][6].peopleInBin.isEmpty());
+        Assert.isTrue(!grid.bins[5][6].peopleInOverlap.isEmpty());
+        Assert.isTrue(!grid.bins[6][5].peopleInOverlap.isEmpty());
+        Assert.isTrue(!grid.bins[5][5].peopleInOverlap.isEmpty());
+
+        Person p3 = new Person(3, new Coordinate(21, 21), size);
+        grid.insertPerson(p3);
+        Assert.isTrue(!grid.bins[6][6].peopleInBin.isEmpty());
+        Assert.isTrue(grid.bins[6][6].peopleInOverlap.isEmpty());
+
     }
 
     @Test

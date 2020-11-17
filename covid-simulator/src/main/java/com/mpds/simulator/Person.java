@@ -8,14 +8,18 @@ public class Person {
     Coordinate pos;
     boolean infected;
     XorShift1024StarPhiRandom randomGen;
+    Coordinate gridSize;
 
-    public Person(int id, Coordinate gridSize){
+    public Person(int id, Coordinate position, Coordinate gridSize){
         this.id = id;
+        this.gridSize = gridSize;
+        pos = position;
         infected = false;
         randomGen = new XorShift1024StarPhiRandom();
-
-        pos = new Coordinate(randomGen.nextInt(gridSize.row),
-                randomGen.nextInt(gridSize.col));
+        if(position == null) {
+            pos = new Coordinate(randomGen.nextInt(gridSize.row),
+                    randomGen.nextInt(gridSize.col));
+        }
     }
 
 
