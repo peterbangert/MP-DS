@@ -12,10 +12,11 @@ public class Bin {
     ArrayList<Person> peopleInOverlap;
     ArrayList<Person> toMove;
     int infectionDistance;
+    int infectionTime;
 
     ArrayList<Person[]> contacts;
 
-    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, GridBins grid){
+    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, int infectionTime, GridBins grid){
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
         overlapCorner = this.lrCorner.addCoordinate(overlapSize);
@@ -23,14 +24,20 @@ public class Bin {
         this.grid = grid;
         peopleInBin = new ArrayList<Person>();
         peopleInOverlap = new ArrayList<Person>();
+        this.infectionTime = infectionTime;
     }
 
     public void calcContactsInfections(Person p1, Person p2){
         int distance = p1.pos.distanceTo(p2.pos);
         if(distance <= infectionDistance){
-            System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
+            //System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
+            if(p1.infected > 0 && p2.infected == 0){
+                if(p2.randomGen.nextInt(101) > distance + 1){
+                    p2.infected = infectionTime + 1;
+                    System.out.println("infection:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
+                }
+            }
         }
-
     }
 
     public void contactsInfections(){
@@ -58,8 +65,14 @@ public class Bin {
         for(int i=0; i<toMove.size(); i++){
             p = toMove.get(i);
             p.move();
+            if(p.infected > 0){
+                p.infected -= 1;
+                if(p.infected == 0){
+                    System.out.println("healed: " + String.valueOf(p.id));
+                }
+            }
             grid.insertPerson(p);
-            toMove = null;
         }
+        toMove = null;
     }
 }

@@ -9,7 +9,7 @@ public class GridBins {
     int binsPerCol;
     Bin[][] bins;
 
-    public GridBins(Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance){
+    public GridBins(Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
         this.size = size;
         this.binSize = binSize;
         this.overlapSize = overlapSize;
@@ -36,7 +36,7 @@ public class GridBins {
             for(int c=0; c<binsPerCol-1; c++){
                 upperLeft = new Coordinate(binSize.row * r, binSize.col * c);
                 lowerRight = new Coordinate(binSize.row * (r+1) - 1, binSize.col * (c+1) - 1);
-                bins[r][c] = new Bin(upperLeft, lowerRight, overlapSize, infectionDistance,this);
+                bins[r][c] = new Bin(upperLeft, lowerRight, overlapSize, infectionDistance, infectionTime, this);
             }
         }
 
@@ -44,32 +44,27 @@ public class GridBins {
         for(int r=0; r<binsPerRow-1; r++){
             upperLeft = new Coordinate(binSize.row * r, binSize.col * (binsPerCol-1));
             lowerRight = new Coordinate(binSize.row * (r+1)-1, size.col-1);
-            bins[r][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.row, 0), infectionDistance, this);
+            bins[r][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.row, 0), infectionDistance, infectionTime,this);
         }
 
         // Special case last row
         for(int c=0; c<binsPerCol-1; c++){
             upperLeft = new Coordinate(binSize.row * (binsPerRow-1), binSize.col * c);
             lowerRight = new Coordinate(size.row-1, binSize.col * (c+1) -1);
-            bins[binsPerRow-1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.col), infectionDistance, this);
+            bins[binsPerRow-1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.col), infectionDistance, infectionTime,this);
         }
 
         // Special case lowest left bin
         upperLeft = new Coordinate(binSize.row * (binsPerRow-1), binSize.col * (binsPerCol - 1));
         lowerRight = new Coordinate(size.row-1, size.col-1);
-        bins[binsPerRow-1][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, this);
+        bins[binsPerRow-1][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, infectionTime, this);
     }
 
     public void insertPerson(Person person){
-        System.out.println(person.pos.row);
-        System.out.println(person.pos.row);
-        System.out.println(binSize.row);
-        System.out.println(binSize.col);
 
         int row = person.pos.row / binSize.row;
         int col = person.pos.col / binSize.col;
-        System.out.println(row);
-        System.out.println(col);
+
         if(row >= binsPerRow){
             row -= 1;
         }
@@ -89,6 +84,19 @@ public class GridBins {
         }
         if(overlapLeft && overlapTop){
             bins[row-1][col-1].peopleInOverlap.add(person);
+        }
+    }
+
+    public void iteration(){
+        for(int r=0; r<binsPerRow; r++) {
+            for (int c = 0; c < binsPerRow; c++) {
+                bins[r][c].contactsInfections();
+            }
+        }
+        for(int r=0; r<binsPerRow; r++) {
+            for (int c = 0; c < binsPerRow; c++) {
+                bins[r][c].movePeople();
+            }
         }
     }
 }
