@@ -36,6 +36,11 @@ public class Bin {
                     p2.infected = infectionTime + 1;
                     System.out.println("infection:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
                 }
+            } else if (p2.infected > 0 && p1.infected == 0){
+                if(p1.randomGen.nextInt(101) > distance + 1){
+                    p1.infected = infectionTime + 1;
+                    System.out.println("infection:" + String.valueOf(p2.id) + " - " + String.valueOf(p1.id));
+                }
             }
         }
     }
