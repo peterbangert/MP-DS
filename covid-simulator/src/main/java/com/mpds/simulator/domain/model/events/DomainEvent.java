@@ -1,4 +1,4 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +26,8 @@ import java.util.UUID;
 public abstract class DomainEvent {
 
     private final UUID uuid;
+
+    private final Long sequenceNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private final LocalDateTime occurredOn;

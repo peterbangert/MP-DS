@@ -1,7 +1,7 @@
 package com.mpds.simulator.port.adapter.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mpds.simulator.domain.model.DomainEvent;
+import com.mpds.simulator.domain.model.events.DomainEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serializer;
 

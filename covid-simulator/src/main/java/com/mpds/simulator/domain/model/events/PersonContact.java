@@ -1,4 +1,4 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,16 +12,19 @@ import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonPropertyOrder({"uuid", "personContactList", "eventType", "occurredOn"})
+@JsonPropertyOrder({"uuid", "person1", "person2", "eventType", "occurredOn"})
 @Getter
 public class PersonContact extends DomainEvent {
 
-    private final Long[] personContactList;
+    private final Long person1;
+    private final Long person2;
+
 
     @JsonCreator
-    public PersonContact(@JsonProperty("personContactList") Long[] personContactList, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(UUID.randomUUID(), occurredOn);
-        this.personContactList=personContactList;
+    public PersonContact(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("person1") Long person1, @JsonProperty("person2") Long person2, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
+        super(UUID.randomUUID(), sequenceNumber, occurredOn);
+        this.person1=person1;
+        this.person2=person2;
     }
 
     @Override

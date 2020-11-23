@@ -1,7 +1,7 @@
 package com.mpds.simulator.port.adapter.kafka;
 
 import com.mpds.simulator.config.KafkaProducerProps;
-import com.mpds.simulator.domain.model.DomainEvent;
+import com.mpds.simulator.domain.model.events.DomainEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
