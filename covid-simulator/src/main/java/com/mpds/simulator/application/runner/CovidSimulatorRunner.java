@@ -20,13 +20,17 @@ public class CovidSimulatorRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info("Start simulating COVID19 cases...");
-        Coordinate size = new Coordinate(1000, 1000);
+//        Coordinate size = new Coordinate(1000, 1000);
+        Coordinate size = new Coordinate(80, 80);
         Coordinate binSize = new Coordinate(20, 20);
-        Coordinate overlap = new Coordinate(6, 6);
+//        Coordinate binSize = new Coordinate(20, 20); --> Works
+//        Coordinate overlap = new Coordinate(6, 6);
+        Coordinate overlap = new Coordinate(10, 10);
         GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, 6, 30);
         grid.insertPerson(new Person(0, null, 100, size));
         // Simulate 12000 persons
-        for(int i=1; i<12000; i++){
+        // 1000
+        for(int i=1; i<1000; i++){
             grid.insertPerson(new Person(i, null, 0, size));
         }
 //        for(int i=0; i<500; i++){

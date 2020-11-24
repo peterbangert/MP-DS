@@ -45,7 +45,7 @@ public class Bin {
         if(distance <= infectionDistance){
             //System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
             DomainEvent personContactEvent = new PersonContact(SequenceManager.currentSequenceNumber, (long) p1.getId(), (long) p2.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-            this.grid.getDomainEventPublisher().sendMessages(personContactEvent).block();
+            this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
             if(p1.getInfected() > 0 && p2.getInfected() == 0){
                 checkInfection(p1, p2, distance);
             } else if (p2.getInfected() > 0 && p1.getInfected() == 0){
@@ -60,7 +60,7 @@ public class Bin {
             healthyPerson.setInfected(infectionTime+1);
             log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
             DomainEvent domainEvent = new InfectionReported(SequenceManager.currentSequenceNumber, (long) healthyPerson.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-            this.grid.getDomainEventPublisher().sendMessages(domainEvent).block();
+            this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
         }
     }
 
@@ -96,7 +96,7 @@ public class Bin {
                     log.info("Person healed: " + p.getId());
 //                    System.out.println("healed: " + p.getId());
                     DomainEvent domainEvent = new PersonHealed(SequenceManager.currentSequenceNumber, (long) p.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-                    this.grid.getDomainEventPublisher().sendMessages(domainEvent).block();
+                    this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
                 }
             }
             grid.insertPerson(p);
