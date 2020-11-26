@@ -3,16 +3,17 @@ package com.mpds.simulator;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
-@SpringBootTest
+//@SpringBootTest
 class CovidSimulatorApplicationTests {
 
-    @Test
+    /*@Test
     void contextLoads() {
-    }
+    }*/
 
     @Test
     public void testGrid() {
@@ -20,7 +21,7 @@ class CovidSimulatorApplicationTests {
         Coordinate size = new Coordinate(22, 22);
         Coordinate binSize = new Coordinate(3, 3);
         Coordinate overlap = new Coordinate(1, 1);
-        GridBins grid = new GridBins(size, binSize, overlap, 3, 14);
+        GridBins grid = new GridBins(null, size, binSize, overlap, 3, 14);
         Assert.isTrue(grid.getBins()[0][0].getUlCorner().getRow() == 0);
         Assert.isTrue(grid.getBins()[0][0].getUlCorner().getCol() == 0);
         Assert.isTrue(grid.getBins()[0][0].getLrCorner().getRow() == 2);
@@ -72,7 +73,7 @@ class CovidSimulatorApplicationTests {
         Coordinate size = new Coordinate(100, 47);
         Coordinate binSize = new Coordinate(10, 6);
         Coordinate overlap = new Coordinate(3, 2);
-        GridBins grid = new GridBins(size, binSize, overlap, 3, 14);
+        GridBins grid = new GridBins(null, size, binSize, overlap, 3, 14);
 
         Assert.isTrue(grid.getBins()[0][7].getUlCorner().getRow() == 0, String.valueOf(grid.getBins()[0][7].getUlCorner().getRow()));
         Assert.isTrue(grid.getBins()[0][7].getUlCorner().getCol() == 42, String.valueOf(grid.getBins()[0][7].getUlCorner().getCol()));
@@ -108,19 +109,19 @@ class CovidSimulatorApplicationTests {
 
     @Test
     public void testIteration(){
-        Coordinate size = new Coordinate(1000, 1000);
-        Coordinate binSize = new Coordinate(20, 20);
-        Coordinate overlap = new Coordinate(6, 6);
-        GridBins grid = new GridBins(size, binSize, overlap, 6, 30);
+        Coordinate size = new Coordinate(50000, 50000);
+        Coordinate binSize = new Coordinate(500, 500);
+        Coordinate overlap = new Coordinate(10, 10);
+        GridBins grid = new GridBins(null, size, binSize, overlap, 6, 30);
         grid.insertPerson(new Person(0, null, 100, size));
         // Inserting 12000 persons
-        for(int i=1; i<12000; i++){
+        for(int i=1; i<1000000; i++){
             grid.insertPerson(new Person(i, null, 0, size));
         }
         // Run 500 rounds
         for(int i=0; i<500; i++){
             System.out.println(i);
-            grid.iteration();
+            grid.iteration(i);
         }
     }
 }

@@ -26,6 +26,10 @@ public class Person {
         }
     }
 
+    public void decrementInfection(){
+        infected--;
+    }
+
     public void move(){
         int move = randomGen.nextInt(4);
         switch (move){

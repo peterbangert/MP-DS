@@ -49,10 +49,11 @@ public class CovidSimulatorRunner implements CommandLineRunner {
             grid.insertPerson(new Person(i, null, 0, size));
         }
         // Run forever to imitate a never ending stream of events
+        int time = 0;
         while (true) {
 //            System.out.println("Current Sequence: " + SequenceManager.currentSequenceNumber);
-            grid.iteration();
-            SequenceManager.currentSequenceNumber++;
+            grid.iteration(time);
+            time++;
         }
     }
 }
