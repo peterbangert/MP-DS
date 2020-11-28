@@ -61,7 +61,9 @@ public class CovidSimulatorRunner implements CommandLineRunner {
             grid.iteration(i);
 
             List<DomainEvent> toBePublishedEvents = grid.getDomainEventList();
-            this.domainEventPublisher.publishEvents(Flux.fromIterable(toBePublishedEvents)).publishOn(Schedulers.boundedElastic()).subscribe();
+
+            Flux<DomainEvent> domainEventParallelFlux = Flux.fromIterable(toBePublishedEvents).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+            this.domainEventPublisher.publishEvents(domainEventParallelFlux).publishOn(Schedulers.boundedElastic()).subscribe();
 //            this.domainEventPublisher.publishEvents(Flux.fromIterable(toBePublishedEvents)).subscribe();
 
 //            time++;
