@@ -7,6 +7,8 @@ import org.apache.kafka.common.serialization.Serializer;
 
 @Slf4j
 public class DomainEventSerDes implements Serializer<DomainEvent> {
+//    private final ObjectMapper objectMapper;
+
     @Override
     public byte[] serialize(String topic, DomainEvent data) {
         byte[] retVal = null;
