@@ -87,9 +87,9 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         System.out.println("Running producer performance test using non-reactive API, class=" + this.getClass().getSimpleName() + " messageSize=" + finalDomainList.size());
         System.out.println("++Events:      " + finalDomainList.size());
         CountDownLatch latch = new CountDownLatch(finalDomainList.size());
-        Flux flux = Flux.fromIterable(finalDomainList).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+        Flux flux = Flux.fromIterable(finalDomainList);
         this.start = System.currentTimeMillis();
-        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).parallel().runOn(Schedulers.boundedElastic()).subscribe();
+        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
 
         latch.await();
 

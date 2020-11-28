@@ -136,7 +136,7 @@ public class DomainEventPublisher {
             ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<String, byte[]>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), payload);
 
             return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
-        }).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+        });
 //        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
 //            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 //            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
