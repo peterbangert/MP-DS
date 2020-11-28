@@ -1,15 +1,19 @@
 package com.mpds.simulator.application.runner;
 
-import com.mpds.simulator.application.service.SequenceManager;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
+import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -45,15 +49,22 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, this.infectionDistance, 30);
         grid.insertPerson(new Person(0, null, 100, size));
         // Simulate 1000 persons
-        for(int i=1; i<this.numberOfPeople; i++){
+        for (int i = 1; i < this.numberOfPeople; i++) {
             grid.insertPerson(new Person(i, null, 0, size));
         }
         // Run forever to imitate a never ending stream of events
-        int time = 0;
-        while (true) {
+//        int time = 0;
+        for (int i = 0; i < 100; i++) {
+//        while (true) {
+
 //            System.out.println("Current Sequence: " + SequenceManager.currentSequenceNumber);
-            grid.iteration(time);
-            time++;
+            grid.iteration(i);
+
+            List<DomainEvent> toBePublishedEvents = grid.getDomainEventList();
+            this.domainEventPublisher.publishEvents(Flux.fromIterable(toBePublishedEvents)).publishOn(Schedulers.boundedElastic()).subscribe();
+//            this.domainEventPublisher.publishEvents(Flux.fromIterable(toBePublishedEvents)).subscribe();
+
+//            time++;
         }
     }
 }

@@ -1,8 +1,11 @@
 package com.mpds.simulator.domain.model;
 
+import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.Data;
-import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class GridBins {
@@ -14,9 +17,11 @@ public class GridBins {
     private int binsPerCol;
     private Bin[][] bins;
 
+    private List<DomainEvent> domainEventList;
+
 
     public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
-
+        this.domainEventList = new ArrayList<>();
         this.size = size;
         this.binSize = binSize;
         this.overlapSize = overlapSize;
@@ -99,11 +104,18 @@ public class GridBins {
             for (int c = 0; c < binsPerRow; c++) {
                 bins[r][c].setTime(time);
                 bins[r][c].contactsInfections();
+
+                // Get the domain events happened in the bin
+                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
+                this.domainEventList.addAll(domainEventsInBin);
+
             }
         }
         for(int r=0; r<binsPerRow; r++) {
             for (int c = 0; c < binsPerRow; c++) {
                 bins[r][c].movePeople();
+                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
+                this.domainEventList.addAll(domainEventsInBin);
             }
         }
     }

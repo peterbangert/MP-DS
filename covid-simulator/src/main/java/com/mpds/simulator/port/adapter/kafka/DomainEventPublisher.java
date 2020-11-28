@@ -8,10 +8,12 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderOptions;
 import reactor.kafka.sender.SenderRecord;
+import reactor.kafka.sender.SenderResult;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,7 +48,7 @@ public class DomainEventPublisher {
         dateFormat = new SimpleDateFormat("HH:mm:ss:SSS z dd MMM yyyy");
     }
 
-    public Mono<Void> sendMessages(DomainEvent domainEvent) {
+    public Mono<Void> sendEvent(DomainEvent domainEvent) {
         ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 
         return sender.send(Mono.just(SenderRecord.create(producerRecord, domainEvent.getUuid().toString())))
@@ -60,6 +62,62 @@ public class DomainEventPublisher {
                             dateFormat.format(new Date(metadata.timestamp())));
                 })
                 .then()
-                .doOnError(e -> log.error("Sending to Kafka failed:"+  e.getMessage()));
+                .doOnError(e -> log.error("Sending to Kafka failed:" + e.getMessage()));
     }
+
+    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux) {
+//        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+
+        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+            SenderRecord<String, DomainEvent, String> stringDomainEventUUIDSenderRecord = SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+            return stringDomainEventUUIDSenderRecord;
+        });
+
+//        Flux<ProducerRecord<String, DomainEvent>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+//            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//            return producerRecord;
+//        });
+
+        return sender.send(senderRecordFlux);
+//                .map(tSenderResult -> {
+//                    RecordMetadata metadata = tSenderResult.recordMetadata();
+//                    System.out.printf("Message %s sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+//                            tSenderResult.correlationMetadata(),
+//                            metadata.topic(),
+//                            metadata.partition(),
+//                            metadata.offset(),
+//                            dateFormat.format(new Date(metadata.timestamp())));
+//                    return Mono.empty();
+//                    processResult(processResult(tSenderResult))
+//                });
+
+//        return sender.send(Mono.just(SenderRecord.create(producerRecord, domainEvent.getUuid().toString())))
+//                .doOnNext(r -> {
+//                    RecordMetadata metadata = r.recordMetadata();
+//                    System.out.printf("Message %s sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+//                            r.correlationMetadata(),
+//                            metadata.topic(),
+//                            metadata.partition(),
+//                            metadata.offset(),
+//                            dateFormat.format(new Date(metadata.timestamp())));
+//                })
+//                .then()
+//                .doOnError(e -> log.error("Sending to Kafka failed:"+  e.getMessage()));
+    }
+
+    private RecordMetadata processResult(SenderResult<String> result) {
+        RecordMetadata metadata = result.recordMetadata();
+        System.out.printf("Message %s sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+                metadata,
+                metadata.topic(),
+                metadata.partition(),
+                metadata.offset(),
+                dateFormat.format(new Date(metadata.timestamp())));
+//        Callback cb = result.correlationMetadata();
+//        cb.onCompletion(metadata, null);
+//        latch.countDown();
+        return metadata;
+    }
+
 }
