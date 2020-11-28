@@ -17,7 +17,7 @@ public class GridBins {
     private int binsPerCol;
     private Bin[][] bins;
 
-    private List<DomainEvent> domainEventList;
+    private final List<DomainEvent> domainEventList;
 
 
     public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
@@ -100,6 +100,7 @@ public class GridBins {
     }
 
     public void iteration(int time){
+        this.domainEventList.clear();
         for(int r=0; r<binsPerRow; r++) {
             for (int c = 0; c < binsPerRow; c++) {
                 bins[r][c].setTime(time);

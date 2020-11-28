@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 @Component
@@ -66,21 +67,28 @@ public class DomainEventPublisher {
                 .doOnError(e -> log.error("Sending to Kafka failed:" + e.getMessage()));
     }
 
-    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux) {
+    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux, CountDownLatch latch) {
 //        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 
         Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
             ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
-            SenderRecord<String, DomainEvent, String> stringDomainEventUUIDSenderRecord = SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
-            return stringDomainEventUUIDSenderRecord;
+            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
         }).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+//        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+//            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+//        });
 
 //        Flux<ProducerRecord<String, DomainEvent>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
 //            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 //            return producerRecord;
 //        });
 
-        return sender.send(senderRecordFlux);
+        return sender.send(senderRecordFlux)
+                .map(stringSenderResult -> {
+                    latch.countDown();
+                    return stringSenderResult;
+                });
 //                .map(tSenderResult -> {
 //                    RecordMetadata metadata = tSenderResult.recordMetadata();
 //                    System.out.printf("Message %s sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
