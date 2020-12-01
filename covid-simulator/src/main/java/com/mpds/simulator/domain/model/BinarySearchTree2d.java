@@ -11,6 +11,7 @@ public class BinarySearchTree2d {
     private Coordinate upperLeft;
     private Coordinate lowerRight;
 
+    private BinarySearchTree2d parent;
     private BinarySearchTree2d leftTree;
     private BinarySearchTree2d rightTree;
 
@@ -20,13 +21,12 @@ public class BinarySearchTree2d {
     private Coordinate leftLowerRight;
     private Coordinate rightUpperLeft;
 
-    public BinarySearchTree2d(boolean splitOnRow, Coordinate upperLeft, Coordinate lowerRight, int untilCornerDistLowerThan){
+    public BinarySearchTree2d(boolean splitOnRow, Coordinate upperLeft, Coordinate lowerRight, int untilCornerDistLowerThan, BinarySearchTree2d parent){
 
         this.splitOnRow = splitOnRow;
         this.upperLeft = upperLeft;
         this.lowerRight = lowerRight;
-
-
+        this.parent = parent;
 
         if(splitOnRow) {
             leftLowerRight = new Coordinate(upperLeft.getRow() + (lowerRight.getRow() - upperLeft.getRow()) / 2, lowerRight.getCol());
@@ -51,35 +51,53 @@ public class BinarySearchTree2d {
         */
         if(upperLeft.distanceTo(lowerRight) >= untilCornerDistLowerThan){
 
-            leftTree = new BinarySearchTree2d(!splitOnRow, upperLeft, leftLowerRight, untilCornerDistLowerThan);
+            leftTree = new BinarySearchTree2d(!splitOnRow, upperLeft, leftLowerRight, untilCornerDistLowerThan, this);
 
-            rightTree = new BinarySearchTree2d(!splitOnRow, rightUpperLeft, lowerRight, untilCornerDistLowerThan);
+            rightTree = new BinarySearchTree2d(!splitOnRow, rightUpperLeft, lowerRight, untilCornerDistLowerThan, this);
 
             leftLeaf = null;
             rightLeaf = null;
 
         } else {
-            leftLeaf = new BinarySearchLeaf(upperLeft, leftLowerRight);
-            rightLeaf = new BinarySearchLeaf(rightUpperLeft, lowerRight);
+            leftLeaf = new BinarySearchLeaf(upperLeft, leftLowerRight, this);
+            rightLeaf = new BinarySearchLeaf(rightUpperLeft, lowerRight, this);
 
             leftTree = null;
             rightTree = null;
         }
+
     }
 
-    public void addPerson(PersonNode pn){
+
+    public Tuple<BinarySearchLeaf> connectLeaves(){
+
+        if(leftTree != null){
+            Tuple<BinarySearchLeaf> leftTuple = leftTree.connectLeaves();
+            Tuple<BinarySearchLeaf> rightTuple = rightTree.connectLeaves();
+
+            leftTuple.getRight().setNext(rightTuple.getLeft());
+
+            return new Tuple<>(leftTuple.getLeft(), rightTuple.getRight());
+
+        } else {
+            leftLeaf.setNext(rightLeaf);
+            return new Tuple<>(leftLeaf, rightLeaf);
+        }
+    }
+
+    public void addPersonNode(LinkedListNode<Person> pn){
 
         if(pn.getContent().getPos().isUpLeftTo(leftLowerRight)){
             if(leftTree != null){
-                leftTree.addPerson(pn);
+                leftTree.addPersonNode(pn);
             } else {
-                leftLeaf.insertPerson(pn);
+                leftLeaf.insertPersonNode(pn);
             }
         } else {
             if(rightTree != null){
-                rightTree.addPerson(pn);
+                rightTree.addPersonNode(pn);
             } else {
-                rightLeaf.insertPerson(pn);
+                rightLeaf.insertPersonNode(pn);
             }
         }
     }

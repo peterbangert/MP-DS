@@ -9,9 +9,9 @@ public class LinkedListNode<T> {
     private LinkedListNode<T> next;
 
 
-    public LinkedListNode(T content, LinkedListNode<T> next){
+    public LinkedListNode(T content){
         this.content = content;
-        this.next = next;
+        next = null;
     }
 
 }

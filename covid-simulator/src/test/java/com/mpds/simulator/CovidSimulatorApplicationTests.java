@@ -1,9 +1,6 @@
 package com.mpds.simulator;
 
-import com.mpds.simulator.domain.model.BinarySearchTree2d;
-import com.mpds.simulator.domain.model.Coordinate;
-import com.mpds.simulator.domain.model.GridBins;
-import com.mpds.simulator.domain.model.Person;
+import com.mpds.simulator.domain.model.*;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
@@ -129,9 +126,62 @@ class CovidSimulatorApplicationTests {
 
     @Test
     public void testBinarySearchTree(){
-        Coordinate upperLeft = new Coordinate(3,3);
-        Coordinate lowerRight = new Coordinate(101, 101);
+        Coordinate upperLeft = new Coordinate(0,0);
+        Coordinate lowerRight = new Coordinate(10, 10);
 
-        BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5);
+        BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5, null);
+        BinarySearchLeaf start = tree.connectLeaves().getLeft();
+
+        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0, lowerRight));
+        LinkedListNode<Person> pn2 = new PersonNode(new Person(0, new Coordinate(9,9), 0, lowerRight));
+        LinkedListNode<Person> pn3 = new PersonNode(new Person(0, new Coordinate(3,7), 0, lowerRight));
+        LinkedListNode<Person> pn4 = new PersonNode(new Person(0, new Coordinate(6,5), 0, lowerRight));
+        LinkedListNode<Person> pn5 = new PersonNode(new Person(0, new Coordinate(6,4), 0, lowerRight));
+        LinkedListNode<Person> pn6 = new PersonNode(new Person(0, new Coordinate(3,8), 0, lowerRight));
+        LinkedListNode<Person> pn7 = new PersonNode(new Person(0, new Coordinate(3,8), 0, lowerRight));
+
+        tree.addPersonNode(pn1);
+        tree.addPersonNode(pn2);
+        tree.addPersonNode(pn3);
+        tree.addPersonNode(pn4);
+        tree.addPersonNode(pn5);
+        tree.addPersonNode(pn6);
+        tree.addPersonNode(pn7);
+
+        BinarySearchLeaf current = start;
+        while(current != null){
+
+            if(current.getPeople().getStart() != null){
+                System.out.println();
+                System.out.println("New Field");
+                System.out.println(String.valueOf(current.getUpperLeft().getRow()) + ", " + String.valueOf(current.getUpperLeft().getCol()));
+                System.out.println(String.valueOf(current.getLowerRight().getRow()) + ", " + String.valueOf(current.getLowerRight().getCol()));
+                System.out.println();
+                System.out.println("People:");
+                LinkedListNode<Person> currP = current.getPeople().getStart();
+                while(currP != null){
+                    System.out.println(String.valueOf(currP.getContent().getPos().getRow())+ ", " + String.valueOf(currP.getContent().getPos().getCol()));
+                    currP = currP.getNext();
+                }
+            }
+            current = current.getNext();
+        }
+    }
+
+    @Test
+    public void printLeaves(){
+        Coordinate upperLeft = new Coordinate(0,0);
+        Coordinate lowerRight = new Coordinate(10, 10);
+
+        BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5, null);
+        BinarySearchLeaf start = tree.connectLeaves().getLeft();
+        BinarySearchLeaf current = start;
+        while(current != null){
+            System.out.println();
+            System.out.println("New Field");
+            System.out.println(String.valueOf(current.getUpperLeft().getRow()) + ", " + String.valueOf(current.getUpperLeft().getCol()));
+            System.out.println(String.valueOf(current.getLowerRight().getRow()) + ", " + String.valueOf(current.getLowerRight().getCol()));
+            current = current.getNext();
+        }
     }
 }

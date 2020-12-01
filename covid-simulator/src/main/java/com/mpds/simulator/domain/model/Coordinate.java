@@ -13,19 +13,19 @@ public class Coordinate {
     private int col;
 
     public boolean isUpLeftTo(Coordinate compare){
-        return this.row < compare.row && this.col < compare.col;
+        return this.row <= compare.row && this.col <= compare.col;
     }
 
     public boolean isDownRightTo(Coordinate compare){
-        return this.row > compare.row && this.col > compare.col;
+        return this.row >= compare.row && this.col >= compare.col;
     }
 
     public boolean isLeftTo(Coordinate compare){
-        return this.col < compare.col;
+        return this.col <= compare.col;
     }
 
     public boolean isAboveTo(Coordinate compare){
-        return this.row < compare.row;
+        return this.row <= compare.row;
     }
 
     public int distanceTo(Coordinate point){
