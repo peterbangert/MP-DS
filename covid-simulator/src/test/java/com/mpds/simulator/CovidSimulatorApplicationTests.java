@@ -1,9 +1,11 @@
 package com.mpds.simulator;
 
+import com.mpds.simulator.domain.model.BinarySearchTree2d;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
@@ -109,19 +111,27 @@ class CovidSimulatorApplicationTests {
 
     @Test
     public void testIteration(){
-        Coordinate size = new Coordinate(50000, 50000);
+        Coordinate size = new Coordinate(100000, 100000);
         Coordinate binSize = new Coordinate(500, 500);
         Coordinate overlap = new Coordinate(10, 10);
         GridBins grid = new GridBins(null, size, binSize, overlap, 6, 30);
         grid.insertPerson(new Person(0, null, 100, size));
         // Inserting 12000 persons
-        for(int i=1; i<1000000; i++){
+        for(int i=1; i<1500000; i++){
             grid.insertPerson(new Person(i, null, 0, size));
         }
         // Run 500 rounds
-        for(int i=0; i<500; i++){
+        for(int i=0; i<100; i++){
             System.out.println(i);
             grid.iteration(i);
         }
+    }
+
+    @Test
+    public void testBinarySearchTree(){
+        Coordinate upperLeft = new Coordinate(3,3);
+        Coordinate lowerRight = new Coordinate(101, 101);
+
+        BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5);
     }
 }

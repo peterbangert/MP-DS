@@ -29,7 +29,7 @@ public class Coordinate {
     }
 
     public int distanceTo(Coordinate point){
-        return abs(this.row - point.row) + abs(this.row - point.row);
+        return abs(this.row - point.row) + abs(this.col - point.col);
     }
 
     public Coordinate addCoordinate(Coordinate toAdd){
