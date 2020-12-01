@@ -32,6 +32,9 @@ public class Bin {
 
     private ArrayList<Person[]> contacts;
 
+    private BinarySearchTree2d searchTree;
+    private BinarySearchLeaf firstLeaf;
+
     public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, int infectionTime, GridBins grid, DomainEventPublisher publisher){
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
@@ -44,7 +47,7 @@ public class Bin {
         this.publisher = publisher;
     }
 
-    public void calcContactsInfections(Person p1, Person p2){
+    public void calcContactInfection(Person p1, Person p2){
         int distance = p1.getPos().distanceTo(p2.getPos());
         if(distance <= infectionDistance){
             //System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
@@ -75,12 +78,12 @@ public class Bin {
             p1 = peopleInBin.get(i);
             for(int j=i+1; j<peopleInBin.size(); j++){
                 p2 = peopleInBin.get(j);
-                calcContactsInfections(p1, p2);
+                calcContactInfection(p1, p2);
             }
 
             for (Person person : peopleInOverlap) {
                 p2 = person;
-                calcContactsInfections(p1, p2);
+                calcContactInfection(p1, p2);
             }
         }
         toMove = peopleInBin;
@@ -105,5 +108,59 @@ public class Bin {
             grid.insertPerson(p);
         }
         toMove = null;
+    }
+
+    public void calcInteractionsInList(Person currentPerson, LinkedListNode<Person> iterNode){
+        while (iterNode != null){
+            calcContactInfection(currentPerson, iterNode.getContent());
+            iterNode = iterNode.getNext();
+        }
+    }
+
+    public void calcInteractions(BinarySearchLeaf currentLeaf, LinkedListNode<Person> currentNode){
+        Person currentPerson = currentNode.getContent();
+        calcInteractionsInList(currentPerson, currentNode.getNext());
+
+        Coordinate position = currentPerson.getPos();
+        Coordinate upperLeftInfectionRange = position.addInt(-infectionDistance);
+        Coordinate lowerRightInfectionRange = position.addInt(infectionDistance);
+
+        if (upperLeftInfectionRange.isDownRightTo(currentLeaf.getUpperLeft()) && lowerRightInfectionRange.isUpLeftTo(currentLeaf.getLowerRight())){ return; }
+
+        BinarySearchTree2d parent = currentLeaf.getParent();
+
+        calcInteractionsInList(currentPerson, parent.getRightLeaf().getPeople().getStart());
+
+        BinarySearchTree2d child = parent;
+        parent = child.getParent();
+
+        while (!(upperLeftInfectionRange.isDownRightTo(child.getUpperLeft()) && lowerRightInfectionRange.isUpLeftTo(child.getLowerRight())) && parent != null){
+            child = parent;
+            parent = child.getParent();
+
+            if (child == parent.getLeftTree()){
+                if( (upperLeftInfectionRange.isDownRightTo(parent.getRightUpperLeft())
+                        && upperLeftInfectionRange.isUpLeftTo(parent.getLowerRight()))
+                        ||
+                        (lowerRightInfectionRange.isDownRightTo(parent.getRightUpperLeft())
+                        && lowerRightInfectionRange.isUpLeftTo(parent.getLowerRight()))){
+
+                }
+            }
+        }
+
+    }
+
+
+    public void nextRound(){
+        BinarySearchLeaf currentLeaf = firstLeaf;
+        //<Person> currentList;
+        LinkedListNode<Person> currentNode;
+        while (currentLeaf != null){
+            currentNode = firstLeaf.getPeople().getStart();
+            while (currentNode != null){
+                calcInteractions(currentLeaf, currentNode);
+            }
+        }
     }
 }

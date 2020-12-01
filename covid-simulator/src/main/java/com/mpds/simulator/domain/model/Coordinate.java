@@ -35,4 +35,8 @@ public class Coordinate {
     public Coordinate addCoordinate(Coordinate toAdd){
         return new Coordinate(this.row + toAdd.row, this.col + toAdd.col);
     }
+
+    public Coordinate addInt(int toAdd){
+        return new Coordinate(this.row + toAdd, this.col + toAdd);
+    }
 }
