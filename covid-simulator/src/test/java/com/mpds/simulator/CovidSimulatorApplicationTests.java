@@ -14,6 +14,7 @@ class CovidSimulatorApplicationTests {
     void contextLoads() {
     }*/
 
+    /*
     @Test
     public void testGrid() {
 
@@ -123,6 +124,7 @@ class CovidSimulatorApplicationTests {
             grid.iteration(i);
         }
     }
+     */
 
     @Test
     public void testBinarySearchTree(){
@@ -132,13 +134,13 @@ class CovidSimulatorApplicationTests {
         BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5, null);
         BinarySearchLeaf start = tree.connectLeaves().getLeft();
 
-        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0, lowerRight));
-        LinkedListNode<Person> pn2 = new PersonNode(new Person(0, new Coordinate(9,9), 0, lowerRight));
-        LinkedListNode<Person> pn3 = new PersonNode(new Person(0, new Coordinate(3,7), 0, lowerRight));
-        LinkedListNode<Person> pn4 = new PersonNode(new Person(0, new Coordinate(6,5), 0, lowerRight));
-        LinkedListNode<Person> pn5 = new PersonNode(new Person(0, new Coordinate(6,4), 0, lowerRight));
-        LinkedListNode<Person> pn6 = new PersonNode(new Person(0, new Coordinate(3,8), 0, lowerRight));
-        LinkedListNode<Person> pn7 = new PersonNode(new Person(0, new Coordinate(3,8), 0, lowerRight));
+        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
+        LinkedListNode<Person> pn2 = new PersonNode(new Person(1, new Coordinate(9,9), 0));
+        LinkedListNode<Person> pn3 = new PersonNode(new Person(2, new Coordinate(3,7), 0));
+        LinkedListNode<Person> pn4 = new PersonNode(new Person(3, new Coordinate(6,5), 0));
+        LinkedListNode<Person> pn5 = new PersonNode(new Person(4, new Coordinate(6,4), 0));
+        LinkedListNode<Person> pn6 = new PersonNode(new Person(5, new Coordinate(3,8), 0));
+        LinkedListNode<Person> pn7 = new PersonNode(new Person(6, new Coordinate(3,8), 0));
 
         tree.addPersonNode(pn1);
         tree.addPersonNode(pn2);
@@ -147,6 +149,7 @@ class CovidSimulatorApplicationTests {
         tree.addPersonNode(pn5);
         tree.addPersonNode(pn6);
         tree.addPersonNode(pn7);
+
 
         BinarySearchLeaf current = start;
         while(current != null){
@@ -166,6 +169,46 @@ class CovidSimulatorApplicationTests {
             }
             current = current.getNext();
         }
+
+    }
+
+    @Test
+    public void testContactInfections(){
+
+
+        Coordinate upperLeft = new Coordinate(0,0);
+        Coordinate lowerRight = new Coordinate(10, 10);
+
+        Coordinate size = new Coordinate(30, 30);
+        Coordinate binSize = new Coordinate(10, 10);
+        Coordinate overlap = new Coordinate(0, 0);
+        GridBins grid = new GridBins(null, size, binSize, overlap, 4, 14, 5);
+
+        Bin bin = grid.getBins()[0][0];
+        System.out.println(bin.getUlCorner());
+        System.out.println(bin.getLrCorner());
+        System.out.println();
+
+        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
+        LinkedListNode<Person> pn2 = new PersonNode(new Person(1, new Coordinate(1,0), 0));
+        LinkedListNode<Person> pn3 = new PersonNode(new Person(2, new Coordinate(1,1), 0));
+        LinkedListNode<Person> pn4 = new PersonNode(new Person(3, new Coordinate(3, 3), 0));
+        LinkedListNode<Person> pn5 = new PersonNode(new Person(4, new Coordinate(7, 5), 0));
+
+        bin.getSearchTree().addPersonNode(pn1);
+        bin.getSearchTree().addPersonNode(pn2);
+        bin.getSearchTree().addPersonNode(pn3);
+        bin.getSearchTree().addPersonNode(pn4);
+        bin.getSearchTree().addPersonNode(pn5);
+        /*
+        System.out.println(bin.getFirstLeaf() == bin.getFirstLeaf().getNext());
+        System.out.println(bin.getFirstLeaf().getPeople().getStart());
+        System.out.println(bin.getFirstLeaf().getUpperLeft());
+
+         */
+
+        bin.iteration();
+
     }
 
     @Test

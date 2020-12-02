@@ -52,7 +52,6 @@ public class BinarySearchTree2d {
         if(upperLeft.distanceTo(lowerRight) >= untilCornerDistLowerThan){
 
             leftTree = new BinarySearchTree2d(!splitOnRow, upperLeft, leftLowerRight, untilCornerDistLowerThan, this);
-
             rightTree = new BinarySearchTree2d(!splitOnRow, rightUpperLeft, lowerRight, untilCornerDistLowerThan, this);
 
             leftLeaf = null;

@@ -42,11 +42,11 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         Coordinate size = new Coordinate(this.gridRows, this.gridColumns);
         Coordinate binSize = new Coordinate(this.binRows, this.binColumns);
         Coordinate overlap = new Coordinate(this.infectionDistance, this.infectionDistance);
-        GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, this.infectionDistance, 30);
-        grid.insertPerson(new Person(0, null, 100, size));
+        GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, this.infectionDistance, 30, 10);
+        grid.insertPerson(new Person(0, null, 100));
         // Simulate 1000 persons
         for(int i=1; i<this.numberOfPeople; i++){
-            grid.insertPerson(new Person(i, null, 0, size));
+            grid.insertPerson(new Person(i, null, 0));
         }
         // Run forever to imitate a never ending stream of events
         int time = 0;

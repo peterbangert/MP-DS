@@ -13,7 +13,7 @@ public class Person {
     private Coordinate gridSize;
     private boolean reported;
 
-    public Person(int id, Coordinate position, int infected, Coordinate gridSize){
+    public Person(int id, Coordinate position, int infected){
         this.id = id;
         this.gridSize = gridSize;
         pos = position;
