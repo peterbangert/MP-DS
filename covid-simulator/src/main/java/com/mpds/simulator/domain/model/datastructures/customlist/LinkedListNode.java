@@ -1,9 +1,9 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.datastructures.customlist;
 
 import lombok.Data;
 
 @Data
-public class LinkedListNode<T> {
+public abstract class LinkedListNode<T> {
 
     private T content;
     private LinkedListNode<T> next;

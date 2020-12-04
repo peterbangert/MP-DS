@@ -48,6 +48,81 @@ public class Coordinate {
         return this.isDownRightTo(upperLeft) && this.isUpLeftTo(lowerRight);
     }
 
+    public boolean infectionRangeContainedMiddle(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedLeft(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col) >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedRight(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col) >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedTop(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedBottom(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedTopLeft(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) >= 0
+                && (this.col - upperLeft.col) >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedTopRight(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) - infectionDistance >= 0
+                && (lowerRight.col - this.col)  >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedBottomLeft(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col)  >= 0
+                && (lowerRight.row - this.row)  >= 0
+                && (lowerRight.col - this.col) - infectionDistance >= 0){ return  true; }
+        return false;
+    }
+
+    public boolean infectionRangeContainedBottomRight(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight){
+        if((this.row - upperLeft.row) - infectionDistance >= 0
+                && (this.col - upperLeft.col) - infectionDistance >= 0
+                && (lowerRight.row - this.row) >= 0
+                && (lowerRight.col - this.col) >= 0){ return  true; }
+        return false;
+    }
+
+
+
+
     public boolean infectionRangeContained(int infectionDistance, Coordinate upperLeft, Coordinate lowerRight, int borderCase){
 
         switch (borderCase) {

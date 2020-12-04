@@ -1,6 +1,9 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.datastructures;
 
 
+import com.mpds.simulator.domain.model.Coordinate;
+import com.mpds.simulator.domain.model.Tuple;
+import com.mpds.simulator.domain.model.datastructures.customlist.PersonNode;
 import lombok.Data;
 
 @Data
@@ -84,7 +87,7 @@ public class BinarySearchTree2d {
         }
     }
 
-    public void addPersonNode(LinkedListNode<Person> pn){
+    public void addPersonNode(PersonNode pn){
 
         if(pn.getContent().getPos().isUpLeftTo(leftLowerRight)){
             if(leftTree != null){

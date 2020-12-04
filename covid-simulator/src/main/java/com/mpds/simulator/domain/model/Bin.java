@@ -1,11 +1,13 @@
 package com.mpds.simulator.domain.model;
 
-import com.mpds.simulator.application.service.SequenceManager;
+import com.mpds.simulator.domain.model.datastructures.customlist.LinkedListNode;
+import com.mpds.simulator.domain.model.datastructures.BinarySearchLeaf;
+import com.mpds.simulator.domain.model.datastructures.BinarySearchTree2d;
 import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.domain.model.events.InfectionReported;
-import com.mpds.simulator.domain.model.events.PersonContact;
 import com.mpds.simulator.domain.model.events.PersonHealed;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,10 +29,11 @@ public class Bin {
     private ArrayList<Person> toMove;
     private int infectionDistance;
     private int infectionTime;
-    private int time;
+    private long time;
     private int gridSizeRow;
     private int gridSizeCol;
     private DomainEventPublisher publisher;
+    private XorShift1024StarPhiRandom randomGen;
 
     private ArrayList<Person[]> contacts;
 
@@ -49,22 +52,28 @@ public class Bin {
         peopleInOverlap = new ArrayList<>();
         this.infectionTime = infectionTime;
         this.publisher = publisher;
+        randomGen = new XorShift1024StarPhiRandom();
         searchTree = new BinarySearchTree2d(true, ulCorner, lrCorner, searchTreeBinSize, null);
         firstLeaf = searchTree.connectLeaves().getLeft();
     }
 
-    public void calcContactInfection(Person p1, Person p2){
-        int distance = p1.getPos().distanceTo(p2.getPos());
-        if(distance <= infectionDistance){
-            System.out.println("contact:" + String.valueOf(p1.getId()) + " - " + String.valueOf(p2.getId()));
-            //DomainEvent personContactEvent = new PersonContact(time, (long) p1.getId(), (long) p2.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-            //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
-            if(p1.getInfected() > 0 && p2.getInfected() == 0){
-                checkInfection(p1, p2, distance);
-            } else if (p2.getInfected() > 0 && p1.getInfected() == 0){
-                checkInfection(p2, p1, distance);
-            }
-        }
+    public void publishContact(int id1, int id2){
+        System.out.println("contact:" + String.valueOf(id1) + " - " + String.valueOf(id2));
+        //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
+    }
+
+    public void publishInfection(int id){
+        //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
+    }
+
+    public void publishHealed(int id){
+        log.info("Person healed: " + p.getId());
+        System.out.println("healed: " + p.getId());
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
     // Check if the infected person is within distance

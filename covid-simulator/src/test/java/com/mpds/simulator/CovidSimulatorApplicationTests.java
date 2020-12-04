@@ -1,11 +1,11 @@
 package com.mpds.simulator;
 
 import com.mpds.simulator.domain.model.*;
-import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
-import org.checkerframework.checker.units.qual.C;
+import com.mpds.simulator.domain.model.datastructures.customlist.LinkedListNode;
+import com.mpds.simulator.domain.model.datastructures.customlist.PersonNode;
+import com.mpds.simulator.domain.model.datastructures.BinarySearchLeaf;
+import com.mpds.simulator.domain.model.datastructures.BinarySearchTree2d;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.Assert;
 
 //@SpringBootTest
 class CovidSimulatorApplicationTests {
@@ -134,13 +134,13 @@ class CovidSimulatorApplicationTests {
         BinarySearchTree2d tree = new BinarySearchTree2d(true, upperLeft, lowerRight, 5, null);
         BinarySearchLeaf start = tree.connectLeaves().getLeft();
 
-        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
-        LinkedListNode<Person> pn2 = new PersonNode(new Person(1, new Coordinate(9,9), 0));
-        LinkedListNode<Person> pn3 = new PersonNode(new Person(2, new Coordinate(3,7), 0));
-        LinkedListNode<Person> pn4 = new PersonNode(new Person(3, new Coordinate(6,5), 0));
-        LinkedListNode<Person> pn5 = new PersonNode(new Person(4, new Coordinate(6,4), 0));
-        LinkedListNode<Person> pn6 = new PersonNode(new Person(5, new Coordinate(3,8), 0));
-        LinkedListNode<Person> pn7 = new PersonNode(new Person(6, new Coordinate(3,8), 0));
+        PersonNode pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
+        PersonNode pn2 = new PersonNode(new Person(1, new Coordinate(9,9), 0));
+        PersonNode pn3 = new PersonNode(new Person(2, new Coordinate(3,7), 0));
+        PersonNode pn4 = new PersonNode(new Person(3, new Coordinate(6,5), 0));
+        PersonNode pn5 = new PersonNode(new Person(4, new Coordinate(6,4), 0));
+        PersonNode pn6 = new PersonNode(new Person(5, new Coordinate(3,8), 0));
+        PersonNode pn7 = new PersonNode(new Person(6, new Coordinate(3,8), 0));
 
         tree.addPersonNode(pn1);
         tree.addPersonNode(pn2);
@@ -189,11 +189,11 @@ class CovidSimulatorApplicationTests {
         System.out.println(bin.getLrCorner());
         System.out.println();
 
-        LinkedListNode<Person> pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
-        LinkedListNode<Person> pn2 = new PersonNode(new Person(1, new Coordinate(1,0), 0));
-        LinkedListNode<Person> pn3 = new PersonNode(new Person(2, new Coordinate(1,1), 0));
-        LinkedListNode<Person> pn4 = new PersonNode(new Person(3, new Coordinate(3, 3), 0));
-        LinkedListNode<Person> pn5 = new PersonNode(new Person(4, new Coordinate(7, 5), 0));
+        PersonNode pn1 = new PersonNode(new Person(0, new Coordinate(0,0), 0));
+        PersonNode pn2 = new PersonNode(new Person(1, new Coordinate(1,0), 0));
+        PersonNode pn3 = new PersonNode(new Person(2, new Coordinate(1,1), 0));
+        PersonNode pn4 = new PersonNode(new Person(3, new Coordinate(3, 3), 0));
+        PersonNode pn5 = new PersonNode(new Person(4, new Coordinate(7, 5), 0));
 
         bin.getSearchTree().addPersonNode(pn1);
         bin.getSearchTree().addPersonNode(pn2);

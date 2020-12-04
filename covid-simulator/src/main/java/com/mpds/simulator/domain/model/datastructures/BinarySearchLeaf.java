@@ -1,5 +1,8 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.datastructures;
 
+import com.mpds.simulator.domain.model.Coordinate;
+import com.mpds.simulator.domain.model.datastructures.customlist.CustomLinkedList;
+import com.mpds.simulator.domain.model.datastructures.customlist.PersonNode;
 import lombok.Data;
 
 @Data
@@ -8,7 +11,7 @@ public class BinarySearchLeaf {
     private BinarySearchTree2d parent;
     private Coordinate upperLeft;
     private Coordinate lowerRight;
-    private CustomLinkedList<Person> people;
+    private CustomLinkedList<PersonNode> people;
     private BinarySearchLeaf next;
 
     public BinarySearchLeaf(Coordinate upperLeft, Coordinate lowerRight, BinarySearchTree2d parent){
@@ -19,7 +22,7 @@ public class BinarySearchLeaf {
         next = null;
     }
 
-    public void insertPersonNode(LinkedListNode<Person> p){
+    public void insertPersonNode(PersonNode p){
         people.addNode(p);
     }
 

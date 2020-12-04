@@ -1,17 +1,17 @@
-package com.mpds.simulator.domain.model;
+package com.mpds.simulator.domain.model.datastructures.customlist;
 
 import lombok.Data;
 
 @Data
-public class CustomLinkedList<T>{
+public class CustomLinkedList<T extends LinkedListNode>{
 
-    private LinkedListNode<T> start;
+    private T start;
 
     public CustomLinkedList(){
         start = null;
     }
 
-    public void addNode(LinkedListNode<T> newNode){
+    public void addNode(T newNode){
         if(start != null){
             newNode.setNext(start);
         }
