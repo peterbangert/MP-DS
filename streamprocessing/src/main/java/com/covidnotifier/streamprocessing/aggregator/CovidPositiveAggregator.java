@@ -1,10 +1,11 @@
 package com.covidnotifier.streamprocessing.aggregator;
 
 import com.covidnotifier.streamprocessing.model.AppUser;
+import com.covidnotifier.streamprocessing.model.events.DomainEvent;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 
-public class CovidPositiveAggregator implements AggregateFunction<AppUser, Tuple2<String, Long>, Tuple2<String, Long>>
+public class CovidPositiveAggregator implements AggregateFunction<DomainEvent, Tuple2<String, Long>, Tuple2<String, Long>>
 {
 
 
@@ -16,8 +17,8 @@ public class CovidPositiveAggregator implements AggregateFunction<AppUser, Tuple
     }
 
     @Override
-    public Tuple2<String, Long> add(AppUser appUser, Tuple2<String, Long> accumulator) {
-        accumulator.f0 = appUser.getCovidPositive();
+    public Tuple2<String, Long> add(DomainEvent event, Tuple2<String, Long> accumulator) {
+        accumulator.f0 = event.eventType();
         accumulator.f1 += 1;
         return accumulator;
     }
