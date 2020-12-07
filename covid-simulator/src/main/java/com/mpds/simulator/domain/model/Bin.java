@@ -1,6 +1,5 @@
 package com.mpds.simulator.domain.model;
 
-import com.mpds.simulator.application.service.SequenceManager;
 import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.domain.model.events.InfectionReported;
 import com.mpds.simulator.domain.model.events.PersonContact;
@@ -32,7 +31,10 @@ public class Bin {
 
     private ArrayList<Person[]> contacts;
 
+    private ArrayList<DomainEvent> domainEventsList;
+
     public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, int infectionTime, GridBins grid, DomainEventPublisher publisher){
+        this.domainEventsList = new ArrayList<>();
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
         overlapCorner = this.lrCorner.addCoordinate(overlapSize);
@@ -47,9 +49,10 @@ public class Bin {
     public void calcContactsInfections(Person p1, Person p2){
         int distance = p1.getPos().distanceTo(p2.getPos());
         if(distance <= infectionDistance){
-            //System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
-            //DomainEvent personContactEvent = new PersonContact(time, (long) p1.getId(), (long) p2.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-            //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
+//            System.out.println("contact:" + String.valueOf(p1.id) + " - " + String.valueOf(p2.id));
+            DomainEvent personContactEvent = new PersonContact((long) time, (long) p1.getId(), (long) p2.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+            this.domainEventsList.add(personContactEvent);
+//            this.publisher.sendEvent(personContactEvent).subscribe();
             if(p1.getInfected() > 0 && p2.getInfected() == 0){
                 checkInfection(p1, p2, distance);
             } else if (p2.getInfected() > 0 && p1.getInfected() == 0){
@@ -62,9 +65,10 @@ public class Bin {
     private void checkInfection(Person infectedPerson, Person healthyPerson, int distance) {
         if(healthyPerson.getRandomGen().nextInt(101) > distance + 1){
             healthyPerson.setInfected(infectionTime+1);
-            //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
-            //DomainEvent domainEvent = new InfectionReported(time, (long) healthyPerson.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-            //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
+//            log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
+            DomainEvent domainEvent = new InfectionReported((long) time, (long) healthyPerson.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+            this.domainEventsList.add(domainEvent);
+//            this.publisher.sendEvent(domainEvent).subscribe();
         }
     }
 
@@ -96,10 +100,11 @@ public class Bin {
             if (p.getInfected() > 0) {
                 p.decrementInfection();
                 if (p.getInfected() == 0) {
-                    //log.info("Person healed: " + p.getId());
+//                    log.info("Person healed: " + p.getId());
 //                    System.out.println("healed: " + p.getId());
-                    //DomainEvent domainEvent = new PersonHealed(time, (long) p.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-                    //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
+                    DomainEvent domainEvent = new PersonHealed((long) time, (long) p.getId(), LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+                    this.domainEventsList.add(domainEvent);
+//                    this.publisher.sendEvent(domainEvent).subscribe();
                 }
             }
             grid.insertPerson(p);

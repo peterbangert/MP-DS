@@ -27,6 +27,6 @@ public class DomainEventScheduler {
         DomainEvent domainEvent = new InfectionReported(0L, personId, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
 
         log.info("Publishing the following event to Kafka: "+ domainEvent.toString());
-        domainEventPublisher.sendMessages(domainEvent).subscribe();
+        domainEventPublisher.sendEvent(domainEvent).subscribe();
     }
 }
