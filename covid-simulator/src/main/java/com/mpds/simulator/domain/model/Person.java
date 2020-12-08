@@ -9,27 +9,26 @@ public class Person {
     private int id;
     private Coordinate pos;
     private int infected;
-    private XorShift1024StarPhiRandom randomGen;
-    private Coordinate gridSize;
-    private boolean reported;
+    private Person next;
+    //private boolean reported;
 
     public Person(int id, Coordinate position, int infected){
         this.id = id;
-        this.gridSize = gridSize;
         pos = position;
         this.infected = infected;
-        reported = false;
-        randomGen = new XorShift1024StarPhiRandom();
+        //reported = false;
         if(position == null) {
-            pos = new Coordinate(randomGen.nextInt(gridSize.getRow()),
-                    randomGen.nextInt(gridSize.getCol()));
+            pos = new Coordinate(GridBins.randomGen.nextInt(GridBins.size.getRow()),
+                    GridBins.randomGen.nextInt(GridBins.size.getCol()));
         }
+        next = null;
     }
 
     public void decrementInfection(){
         infected--;
     }
 
+    /*
     public void move(){
         int move = randomGen.nextInt(4);
         switch (move){
@@ -71,5 +70,5 @@ public class Person {
                 break;
 
         }
-    }
+    }*/
 }

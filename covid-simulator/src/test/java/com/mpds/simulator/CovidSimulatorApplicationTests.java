@@ -1,10 +1,11 @@
 package com.mpds.simulator;
 
 import com.mpds.simulator.domain.model.*;
-import com.mpds.simulator.domain.model.datastructures.customlist.LinkedListNode;
-import com.mpds.simulator.domain.model.datastructures.customlist.PersonNode;
-import com.mpds.simulator.domain.model.datastructures.BinarySearchLeaf;
-import com.mpds.simulator.domain.model.datastructures.BinarySearchTree2d;
+import com.mpds.simulator.domain.model.bins.Bin;
+import com.mpds.simulator.domain.model.datastructures.LinkedListNode;
+import com.mpds.simulator.domain.model.datastructures.PersonNode;
+import com.mpds.simulator.domain.model.deprecated.datastructures.BinarySearchLeaf;
+import com.mpds.simulator.domain.model.deprecated.datastructures.BinarySearchTree2d;
 import org.junit.jupiter.api.Test;
 
 //@SpringBootTest
@@ -126,6 +127,7 @@ class CovidSimulatorApplicationTests {
     }
      */
 
+    /*
     @Test
     public void testBinarySearchTree(){
         Coordinate upperLeft = new Coordinate(0,0);
@@ -205,7 +207,7 @@ class CovidSimulatorApplicationTests {
         System.out.println(bin.getFirstLeaf().getPeople().getStart());
         System.out.println(bin.getFirstLeaf().getUpperLeft());
 
-         */
+
 
         bin.iteration();
 
@@ -225,6 +227,66 @@ class CovidSimulatorApplicationTests {
             System.out.println(String.valueOf(current.getUpperLeft().getRow()) + ", " + String.valueOf(current.getUpperLeft().getCol()));
             System.out.println(String.valueOf(current.getLowerRight().getRow()) + ", " + String.valueOf(current.getLowerRight().getCol()));
             current = current.getNext();
+        }
+    }
+    */
+
+    @Test
+    public void smallTest(){
+        Coordinate binSize = new Coordinate(4,4);
+        Coordinate size = new Coordinate(30, 30);
+        GridBins grid = new GridBins(null, size, binSize, 4, 14);
+        grid.insertPerson(new Person(0, new Coordinate(0,0), 10));
+        grid.insertPerson(new Person(1, new Coordinate(1,0), 0));
+        grid.insertPerson(new Person(2, new Coordinate(1,1), 0));
+        grid.insertPerson(new Person(3, new Coordinate(3, 3), 0));
+        grid.insertPerson(new Person(4, new Coordinate(7, 5), 0));
+
+        for(int i =5; i<100; i++){
+            grid.insertPerson(new Person(i, null, 0));
+        }
+
+
+        for(int i=0; i<500; i++){
+            System.out.println(i);
+            grid.iteration(i);
+            for(int r=0; r<grid.getBinsPerRow(); r++){
+                for(int c=0; c<grid.getBinsPerCol(); c++){
+                    if(grid.getBins()[r][c].getPeople().getStart() != null){
+                        System.out.println(grid.getBins()[r][c].getPeople());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void watchBabyPurr(){
+        Coordinate binSize = new Coordinate(100,100);
+        Coordinate size = new Coordinate(10000, 10000);
+        GridBins grid = new GridBins(null, size, binSize, 6, 30);
+
+        grid.insertPerson(new Person(0, null, 100));
+        // Inserting 12000 persons
+        int j = 0;
+        for(int r=0; r<grid.getBinsPerRow(); r+=10){
+            for(int c=0; c<grid.getBinsPerCol(); c+=10) {
+                grid.insertPerson(new Person(j, new Coordinate(r, c), 0));
+                j++;
+            }
+        }
+
+        Person iter = grid.getBins()[0][0].getPeople().getStart();
+        while (iter != null){
+            System.out.println(iter.getId());
+            iter = iter.getNext();
+        }
+
+
+        // Run 500 rounds
+        for(int i=0; i<500; i++){
+            System.out.println("Iteration: " + String.valueOf(i));
+            grid.iteration(i);
         }
     }
 }
