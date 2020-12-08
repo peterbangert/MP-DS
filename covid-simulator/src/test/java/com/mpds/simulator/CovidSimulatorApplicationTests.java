@@ -266,25 +266,31 @@ class CovidSimulatorApplicationTests {
         Coordinate size = new Coordinate(10000, 10000);
         GridBins grid = new GridBins(null, size, binSize, 6, 30);
 
-        grid.insertPerson(new Person(0, null, 100));
+        grid.insertPerson(new Person(0, null, 30));
         // Inserting 12000 persons
-        int j = 0;
-        for(int r=0; r<grid.getBinsPerRow(); r+=10){
-            for(int c=0; c<grid.getBinsPerCol(); c+=10) {
+
+        /*
+        int j = 1;
+        for(int r=0; r<size.getRow(); r+=10){
+            for(int c=0; c<size.getCol(); c+=10) {
                 grid.insertPerson(new Person(j, new Coordinate(r, c), 0));
                 j++;
             }
-        }
+        }*/
 
+        for(int i = 1; i < 6000000; i++){
+            grid.insertPerson(new Person(i, null, 0));
+        }
+        /*
         Person iter = grid.getBins()[0][0].getPeople().getStart();
         while (iter != null){
             System.out.println(iter.getId());
             iter = iter.getNext();
-        }
+        }*/
 
 
         // Run 500 rounds
-        for(int i=0; i<500; i++){
+        for(int i=0; i<250; i++){
             System.out.println("Iteration: " + String.valueOf(i));
             grid.iteration(i);
         }

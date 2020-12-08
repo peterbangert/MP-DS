@@ -198,6 +198,8 @@ public class GridBins {
         int row = person.getPos().getRow() / binSize.getRow();
         int col = person.getPos().getCol() / binSize.getCol();
 
+        //System.out.println(String.valueOf(row) + " - " + String.valueOf(col));
+
         if(row >= binsPerRow){
             row -= 1;
         }

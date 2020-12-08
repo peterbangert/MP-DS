@@ -58,14 +58,15 @@ public abstract class Bin {
     }
 
     public boolean sampleInfection(int distance){
-        return GridBins.randomGen.nextInt(GridBins.infectionDistance + 5) > distance + 1;
+        return GridBins.randomGen.nextInt(GridBins.infectionDistance*2) > distance + 1;
     }
 
     public void addPerson(Person pn){
         people.addPerson(pn);
     }
 
-    public void addToBeAdded(Person pn) {toBeAdded.addPerson(pn); }
+    public void addToBeAdded(Person pn) {//System.out.println("moved bin: " + String.valueOf(pn.getId()));
+    toBeAdded.addPerson(pn); }
 
     public void possibleInfection(Person potentiallyInfected, int distance){
         if(sampleInfection(distance)){
@@ -83,7 +84,7 @@ public abstract class Bin {
 
     public static void publishInfection(int id){
         //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
-        System.out.println("infection: " + String.valueOf(id));
+        //System.out.println("infection: " + String.valueOf(id));
         //DomainEvent domainEvent = new InfectionReported(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
@@ -127,13 +128,8 @@ public abstract class Bin {
     public abstract void findInteractionsWithNeighbours(Person person);
 
     public void findInteractions(Person currentPerson){
-        //System.out.println("find interactions");
         Person iterNode = currentPerson.getNext();
         while (iterNode != null){
-            if(iterNode.getId() == 98){
-                //System.out.println();;
-            };
-            //System.out.println("iternode " + String.valueOf(iterNode.getId()));
             calcInteractions(currentPerson, iterNode);
             iterNode = iterNode.getNext();
         }
@@ -150,7 +146,6 @@ public abstract class Bin {
         findInteractions(startPerson);
 
         while (movePerson(startPerson)){
-            //System.out.println("Start changed " + String.valueOf(startPerson.getId()));
             people.setStart(nextPerson);
             if (nextPerson == null ){
                 people.setEnd(null);
@@ -168,7 +163,6 @@ public abstract class Bin {
         Person nextPerson = middlePerson.getNext();
 
         while (nextPerson != null){
-            //System.out.println("new iteration");
             findInteractions(middlePerson);
             int id_before = middlePerson.getNext().getId();
             if (movePerson(middlePerson)){
@@ -177,12 +171,10 @@ public abstract class Bin {
                 if (middlePerson.getNext() != null){
                     id_after = middlePerson.getNext().getId();
                 }
-                //System.out.println("Person " + String.valueOf(middlePerson.getId()) + " next from " + String.valueOf(id_before) + " to " + String.valueOf(id_after) + " before neu " + String.valueOf(beforePerson.getNext().getId()));
             } else {
                 beforePerson = middlePerson;
             }
             middlePerson = nextPerson;
-            //System.out.println("New middle " + String.valueOf(middlePerson.getId()));
             nextPerson = nextPerson.getNext();
         }
         findInteractions(middlePerson);
@@ -193,7 +185,8 @@ public abstract class Bin {
     }
 
     public void iterate(){
-        System.out.println("iterate");
+
+
         Person currentPerson = people.getStart();
 
         if(currentPerson == null){
@@ -211,7 +204,7 @@ public abstract class Bin {
         if(currentPerson == null){
             return;
         }
-        iterateRest(currentPerson, beforePerson);
+        iterateRest(beforePerson, currentPerson);
     }
 
     /*
