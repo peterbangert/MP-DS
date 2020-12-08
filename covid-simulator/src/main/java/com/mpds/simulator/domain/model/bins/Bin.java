@@ -186,7 +186,6 @@ public abstract class Bin {
 
     public void iterate(){
 
-
         Person currentPerson = people.getStart();
 
         if(currentPerson == null){

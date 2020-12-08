@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class GridBins {
 
-    public static Coordinate size;
+
     private Coordinate binSize;
     private Coordinate overlapSize;
     private int binsPerRow;
@@ -19,6 +19,7 @@ public class GridBins {
     private Bin[][] bins;
     public static int infectionDistance;
     public static int infectionTime;
+    public static Coordinate size;
     public static XorShift1024StarPhiRandom randomGen;
 
 
