@@ -3,9 +3,11 @@ package com.mpds.simulator.domain.model;
 import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.Data;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 @Data
 public class GridBins {
@@ -20,7 +22,7 @@ public class GridBins {
     private final List<DomainEvent> domainEventList;
 
 
-    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
+    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime) {
         this.domainEventList = new ArrayList<>();
         this.size = size;
         this.binSize = binSize;
@@ -33,10 +35,10 @@ public class GridBins {
         binsPerRow = (int) Math.ceil(size.getRow() / (float) binSize.getRow());
         binsPerCol = (int) Math.ceil(size.getCol() / (float) binSize.getCol());
 
-        if(rowResidualTooSmall) {
+        if (rowResidualTooSmall) {
             binsPerRow -= 1;
         }
-        if(colResidualTooSmall){
+        if (colResidualTooSmall) {
             binsPerCol -= 1;
         }
 
@@ -44,43 +46,43 @@ public class GridBins {
 
         Coordinate upperLeft;
         Coordinate lowerRight;
-        for(int r=0; r<binsPerRow-1; r++){
-            for(int c=0; c<binsPerCol-1; c++){
+        for (int r = 0; r < binsPerRow - 1; r++) {
+            for (int c = 0; c < binsPerCol - 1; c++) {
                 upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
-                lowerRight = new Coordinate(binSize.getRow() * (r+1) - 1, binSize.getCol() * (c+1) - 1);
+                lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, binSize.getCol() * (c + 1) - 1);
                 bins[r][c] = new Bin(upperLeft, lowerRight, overlapSize, infectionDistance, infectionTime, this, domainEventPublisher);
             }
         }
 
         // Special case last column
-        for(int r=0; r<binsPerRow-1; r++){
-            upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * (binsPerCol-1));
-            lowerRight = new Coordinate(binSize.getRow() * (r+1)-1, size.getCol()-1);
-            bins[r][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.getRow(), 0), infectionDistance, infectionTime,this, domainEventPublisher);
+        for (int r = 0; r < binsPerRow - 1; r++) {
+            upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * (binsPerCol - 1));
+            lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, size.getCol() - 1);
+            bins[r][binsPerCol - 1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.getRow(), 0), infectionDistance, infectionTime, this, domainEventPublisher);
         }
 
         // Special case last row
-        for(int c=0; c<binsPerCol-1; c++){
-            upperLeft = new Coordinate(binSize.getRow() * (binsPerRow-1), binSize.getCol() * c);
-            lowerRight = new Coordinate(size.getRow()-1, binSize.getCol() * (c+1) -1);
-            bins[binsPerRow-1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.getCol()), infectionDistance, infectionTime,this, domainEventPublisher);
+        for (int c = 0; c < binsPerCol - 1; c++) {
+            upperLeft = new Coordinate(binSize.getRow() * (binsPerRow - 1), binSize.getCol() * c);
+            lowerRight = new Coordinate(size.getRow() - 1, binSize.getCol() * (c + 1) - 1);
+            bins[binsPerRow - 1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.getCol()), infectionDistance, infectionTime, this, domainEventPublisher);
         }
 
         // Special case lowest left bin
-        upperLeft = new Coordinate(binSize.getRow() * (binsPerRow-1), binSize.getCol() * (binsPerCol - 1));
-        lowerRight = new Coordinate(size.getRow()-1, size.getCol()-1);
-        bins[binsPerRow-1][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, infectionTime, this, domainEventPublisher);
+        upperLeft = new Coordinate(binSize.getRow() * (binsPerRow - 1), binSize.getCol() * (binsPerCol - 1));
+        lowerRight = new Coordinate(size.getRow() - 1, size.getCol() - 1);
+        bins[binsPerRow - 1][binsPerCol - 1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, infectionTime, this, domainEventPublisher);
     }
 
-    public void insertPerson(Person person){
+    public void insertPerson(Person person) {
 
         int row = person.getPos().getRow() / binSize.getRow();
         int col = person.getPos().getCol() / binSize.getCol();
 
-        if(row >= binsPerRow){
+        if (row >= binsPerRow) {
             row -= 1;
         }
-        if(col >= binsPerCol){
+        if (col >= binsPerCol) {
             col -= 1;
         }
 
@@ -88,36 +90,68 @@ public class GridBins {
         boolean overlapTop = person.getPos().getRow() % binSize.getRow() < overlapSize.getRow() && row > 0;
         boolean overlapLeft = person.getPos().getCol() % binSize.getCol() < overlapSize.getCol() && col > 0;
 
-        if(overlapTop){
-            bins[row-1][col].getPeopleInOverlap().add(person);
+        if (overlapTop) {
+            bins[row - 1][col].getPeopleInOverlap().add(person);
         }
-        if(overlapLeft){
-            bins[row][col-1].getPeopleInOverlap().add(person);
+        if (overlapLeft) {
+            bins[row][col - 1].getPeopleInOverlap().add(person);
         }
-        if(overlapLeft && overlapTop){
-            bins[row-1][col-1].getPeopleInOverlap().add(person);
-        }
-    }
-
-    public void iteration(int time){
-        this.domainEventList.clear();
-        for(int r=0; r<binsPerRow; r++) {
-            for (int c = 0; c < binsPerRow; c++) {
-                bins[r][c].setTime(time);
-                bins[r][c].contactsInfections();
-
-                // Get the domain events happened in the bin
-                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
-                this.domainEventList.addAll(domainEventsInBin);
-
-            }
-        }
-        for(int r=0; r<binsPerRow; r++) {
-            for (int c = 0; c < binsPerRow; c++) {
-                bins[r][c].movePeople();
-                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
-                this.domainEventList.addAll(domainEventsInBin);
-            }
+        if (overlapLeft && overlapTop) {
+            bins[row - 1][col - 1].getPeopleInOverlap().add(person);
         }
     }
+
+
+    public Flux<?> contactsInfectionsEvents(int time, CountDownLatch latch) {
+        return Flux.range(0, binsPerRow)
+                .flatMap(row -> Flux.range(0, binsPerRow).flatMap(column -> bins[row][column].checkContactInfectionEvents(time, latch)));
+    }
+
+    public Flux<?> iteration(int time, CountDownLatch latch) {
+        return contactsInfectionsEvents(time, latch)
+                .flatMap(o -> Flux.range(0, binsPerRow)
+                        .flatMap(row -> Flux.range(0, binsPerRow)
+                                .flatMap(column -> bins[row][column]
+                                        .movePeople(time, latch))));
+    }
+
+//    public void iteration(int time) {
+////        this.domainEventList.clear();
+///*
+//        Flux.range(0, binsPerRow)
+//                .zipWith(Flux.range(0, binsPerRow))
+//                .map(tuple -> {
+//                    bins[tuple.getT1()][tuple.getT2()].setTime(time);
+//                    return tuple;
+//                })
+//                .map(tuple -> {
+//                    bins[tuple.getT1()][tuple.getT2()].contactsInfections();
+//                    return tuple;
+//                })
+//                .map(tuple -> {
+//
+//                });
+//*/
+//
+//        for (int r = 0; r < binsPerRow; r++) {
+//            for (int c = 0; c < binsPerRow; c++) {
+//                bins[r][c].setTime(time);
+//                bins[r][c].contactsInfections();
+//
+//                // Get the domain events happened in the bin
+//                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
+//                this.domainEventList.addAll(domainEventsInBin);
+//
+//            }
+//        }
+//        for (int r = 0; r < binsPerRow; r++) {
+//            for (int c = 0; c < binsPerRow; c++) {
+//                bins[r][c].movePeople();
+//                List<DomainEvent> domainEventsInBin = bins[r][c].getDomainEventsList();
+//                this.domainEventList.addAll(domainEventsInBin);
+//            }
+//        }
+//    }
+
+
 }

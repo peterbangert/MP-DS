@@ -73,7 +73,7 @@ public class DomainEventPublisher {
                 .doOnError(e -> log.error("Sending to Kafka failed:" + e.getMessage()));
     }
 
-    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux, CountDownLatch latch) {
+    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux) {
 //        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 
         Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
@@ -92,7 +92,7 @@ public class DomainEventPublisher {
 
         return sender.send(senderRecordFlux)
                 .map(stringSenderResult -> {
-                    latch.countDown();
+//                    latch.countDown();
                     return stringSenderResult;
                 });
 //                .map(tSenderResult -> {
@@ -119,6 +119,65 @@ public class DomainEventPublisher {
 //                })
 //                .then()
 //                .doOnError(e -> log.error("Sending to Kafka failed:"+  e.getMessage()));
+    }
+
+    public Flux<?> publishEvents(Flux<DomainEvent> domainEventFlux, CountDownLatch latch) {
+//        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+
+//        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+//            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+//        }).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+
+//        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+//            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+//        }).publishOn(Schedulers.parallel());
+        Flux senderRecordFlux = domainEventFlux.map( domainEvent -> {
+            byte[] payload = new byte[domainEvent.toString().getBytes().length];
+            try {
+                payload = objectMapper.writeValueAsString(domainEvent).getBytes();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<String, byte[]>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), payload);
+
+            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+        });
+        return sender.send(senderRecordFlux)
+                .map(stringSenderResult -> {
+                    latch.countDown();
+                    return stringSenderResult;
+                });
+    }
+
+    public Flux<?> publishEvent(DomainEvent domainEvent, CountDownLatch latch) {
+//        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+
+//        Flux<SenderRecord<String, DomainEvent, String>> senderRecordFlux = domainEventFlux.map(domainEvent -> {
+//            ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//            return SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+//        }).parallel().runOn(Schedulers.boundedElastic()).sequential().publishOn(Schedulers.boundedElastic());
+
+//        ProducerRecord<String, DomainEvent> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
+//        SenderRecord<String, DomainEvent, String> stringDomainEventStringSenderRecord = SenderRecord.create(producerRecord, domainEvent.getUuid().toString());
+//        Mono<SenderRecord<String, DomainEvent, String>> senderRecordMono = Mono.just(stringDomainEventStringSenderRecord);
+
+        byte[] payload = new byte[domainEvent.toString().getBytes().length];
+        try {
+            payload = objectMapper.writeValueAsString(domainEvent).getBytes();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<String, byte[]>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), payload);
+
+        Mono senderRecordMono = Mono.just(SenderRecord.create(producerRecord, domainEvent.getUuid().toString()));
+
+        return sender.send(senderRecordMono)
+                .map(stringSenderResult -> {
+                    latch.countDown();
+                    return stringSenderResult;
+                });
     }
 
     public Flux<?> publishAsByteEvents(Flux<DomainEvent> domainEventFlux, CountDownLatch latch) {

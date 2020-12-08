@@ -19,7 +19,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderOptions;
@@ -28,7 +27,10 @@ import reactor.kafka.sender.SenderRecord;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 @Component
@@ -57,7 +59,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 
     private final DomainEventPublisher domainEventPublisher;
 
-    private final List finalDomainList = new ArrayList();
+//    private final List finalDomainList = new ArrayList();
 
     private long start;
     private long completionTime;
@@ -72,33 +74,63 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, this.infectionDistance, 30);
         grid.insertPerson(new Person(0, null, 100, size));
 
-        Scheduler newBoundedElastic = Schedulers.newBoundedElastic(100, 500000, "Custom-Elastic-Thread");
+//        Scheduler newBoundedElastic = Schedulers.newBoundedElastic(100, 500000, "Custom-Elastic-Thread");
         // Simulate 1000 persons
+
+//        Disposable disposable = Flux.range(1, (int) (numberOfPeople - 1))
+//                .map(sequenceNumber -> {
+//                    grid.insertPerson(new Person(sequenceNumber, null, 0, size));
+//                    return sequenceNumber;
+//                })
+//                .flatMap(sequenceNumber -> Flux.range(0, 2)
+//                        .flatMap(integer -> {
+//                            grid.iteration(sequenceNumber);
+//                            return Mono.empty();
+//                        }))
+//                .subscribe();
         for (int i = 1; i < this.numberOfPeople; i++) {
             grid.insertPerson(new Person(i, null, 0, size));
         }
-        for (int i = 0; i < 2; i++) {
-            grid.iteration(i);
 
-            List<DomainEvent> toBePublishedEvents = grid.getDomainEventList();
 
-            this.finalDomainList.addAll(toBePublishedEvents);
-        }
-        System.out.println("Running producer performance test using non-reactive API, class=" + this.getClass().getSimpleName() + " messageSize=" + finalDomainList.size());
-        System.out.println("++Events:      " + finalDomainList.size());
-        CountDownLatch latch = new CountDownLatch(finalDomainList.size());
-        Flux flux = Flux.fromIterable(finalDomainList);
-        this.start = System.currentTimeMillis();
-        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
+        // 160000 events (172200)  --> Throughput 16739.574219889182
+//        for (int i = 0; i < 2; i++) {
+//            grid.iteration(i);
+//
+//            List<DomainEvent> toBePublishedEvents = grid.getDomainEventList();
+//
+//            this.finalDomainList.addAll(toBePublishedEvents);
+//        }
+//        172200
+        int numberOfEvents=50000;
+        System.out.println("Running producer performance test using reactive API, class=" + this.getClass().getSimpleName() + " messageSize=" + numberOfEvents);
+//        System.out.println("++Events:      " + finalDomainList.size());
+        System.out.println("++Events:      " + numberOfEvents);
+        CountDownLatch latch = new CountDownLatch(numberOfEvents);
+//        Flux flux = Flux.fromIterable(finalDomainList);
+//        this.start = System.currentTimeMillis();
+//        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
+
+//         (int) (numberOfPeople - 1)
+        Disposable disposable = Flux.range(1, 2)
+//                .map(sequenceNumber -> {
+//                    grid.insertPerson(new Person(sequenceNumber, null, 0, size));
+//                    return sequenceNumber;
+//                })
+                .flatMap(sequenceNumber -> Flux.range(0, 2)
+                        .flatMap(integer -> grid.iteration(sequenceNumber, latch)))
+                .subscribe();
 
         latch.await();
 
+        System.out.println("++++++++COUNTDOWN LATCH ACHIEVED: NOW CLOSING THE STREAM!!!!");
         disposable.dispose();
 
         if (completionTime == 0) this.completionTime = System.currentTimeMillis();
 
         long elasped = completionTime - start;
-        double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
+//        double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
+        double recordsPerSec = 1000.0 * numberOfEvents / (double) elasped;
         System.out.println("Records/s: " + recordsPerSec);
 
 
@@ -113,7 +145,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 //        System.out.println(objectMapper.writeValueAsString(domainEvent).getBytes().length);
 //        byte[] payload = objectMapper.writeValueAsString(domainEvent).getBytes();
 
-        int numRecords=50000;
+        int numRecords = 50000;
         CountDownLatch latch = new CountDownLatch(numRecords);
         int recordSize = 507;
         Random random = new Random(0);
@@ -150,7 +182,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
                         e.printStackTrace();
                     }
                     ProducerRecord<byte[], byte[]> record = new ProducerRecord<>("covid", payload);
-                        return SenderRecord.create(record, i);
+                    return SenderRecord.create(record, i);
 
 //                    ProducerRecord<Byte, Byte> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 
