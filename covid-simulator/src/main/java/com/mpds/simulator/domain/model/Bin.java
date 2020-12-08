@@ -119,11 +119,11 @@ public class Bin {
         int distance;
         int lastPersonIndex = peopleInBin.size() - 1;
         return Flux.range(0, peopleInBin.size()-1)
-                .flatMap(i -> Flux.range(1, peopleInBin.size()-2).flatMap(j -> {
+                .flatMap(i -> Flux.range(1, peopleInBin.size()-1-i).flatMap(j -> {
                             Person person1 = peopleInBin.get(i);
 //                    System.out.println("THIS IS MY j++++::: ");
 //                            System.out.println(j + "  peopleInBin:  " + peopleInBin.size());
-                            Person person2 = peopleInBin.get(j);
+                            Person person2 = peopleInBin.get(j+i);
                             return calcContactInfectionDomainEvents(person1, person2, time, latch)
                                     .flatMap(o -> Flux.fromIterable(peopleInOverlap)
                                             .flatMap(personInOverlap -> calcContactInfectionDomainEvents(person1, personInOverlap, time, latch)));

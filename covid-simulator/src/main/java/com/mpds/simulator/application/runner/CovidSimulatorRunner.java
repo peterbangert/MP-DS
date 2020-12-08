@@ -112,7 +112,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 //        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
 
 //         (int) (numberOfPeople - 1)
-        Disposable disposable = Flux.range(1, 2)
+        Disposable disposable = Flux.range(1, 3)
 //                .map(sequenceNumber -> {
 //                    grid.insertPerson(new Person(sequenceNumber, null, 0, size));
 //                    return sequenceNumber;
@@ -121,7 +121,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
                         .flatMap(integer -> grid.iteration(sequenceNumber, latch)))
                 .subscribe();
 
-        latch.await();
+//        latch.await();
 
         System.out.println("++++++++COUNTDOWN LATCH ACHIEVED: NOW CLOSING THE STREAM!!!!");
         disposable.dispose();
