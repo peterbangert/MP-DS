@@ -1,4 +1,4 @@
-package com.covidnotifier.streamprocessing.model.events;
+package de.tu_berlin.mpds.covid_notifier.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

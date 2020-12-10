@@ -1,4 +1,4 @@
-package com.covidnotifier.streamprocessing.model.events;
+package de.tu_berlin.mpds.covid_notifier.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
