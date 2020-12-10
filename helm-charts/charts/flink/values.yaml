@@ -2,6 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+image: pfisterb/flink:1.11.2-scala_2.12-java_11
+
 ## Change flink jobmanager configuration parameters below:
 jobmanager:
   replicas: 1
@@ -10,11 +12,11 @@ jobmanager:
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
-      memory: "1024Mi"
+      memory: "4096Mi"
     limits:
-      memory: "1024Mi"
+      memory: "4096Mi"
   ## jobmanager.memory.process.size in configmap
-  configMemory: "1024m"
+  configMemory: "4096m"
 
   ## Liveness (and eventually Readiness) probe values.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
@@ -25,17 +27,17 @@ jobmanager:
 
 ## Change flink taskmanager configuration parameters below:
 taskmanager:
-  replicas: 1
+  replicas: 3
 
   ## Configure resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
-      memory: "1024Mi"
+      memory: "4096Mi"
     limits:
-      memory: "1024Mi"
+      memory: "4096Mi"
   ## jobmanager.memory.process.size in configmap
-  configMemory: "1024m"
+  configMemory: "4096m"
 
   ## Liveness (and eventually Readiness) probe values.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/

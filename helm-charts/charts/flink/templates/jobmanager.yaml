@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: jobmanager
-        image: flink:1.11.2-scala_2.12
+        image: {{ .Values.image }}
         workingDir: /opt/flink
         resources:
 {{ toYaml .Values.taskmanager.resources | indent 12 }}
