@@ -2,23 +2,28 @@
 
 > Useful commands and howto's
 
+## Build the Jar
+- Navigate to the project directory
+
+        mvn clean package spring-boot:repackage
+        
 ## Local Kafka
 
 - Start Zookeeper
 
-        $ bin/zookeeper-server-start.sh config/zookeeper.properties
+         bin/zookeeper-server-start.sh config/zookeeper.properties
 
 - Start Kafka
 
-        $ bin/kafka-server-start.sh config/server.properties
+         bin/kafka-server-start.sh config/server.properties
 
 - KafkaCat List, Produce, Consume
 
-        $ kafkacat -b localhost:9092 -[P|C|L] -t topic
+         kafkacat -b localhost:9092 -[P|C|L] -t topic
 
 - Delete Topic
 
-        $ bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic covid
+         bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic covid
 
 
 
@@ -26,14 +31,14 @@
 
 - Start Redis
 
-        $ redis-server
+         redis-server
 
 - Check Redis
 
-        $ redis-cli ping
+         redis-cli ping
         PONG
 
 - Check Hashmaps
 
-        $ redis-cli hgetall key
+         redis-cli hgetall key
 

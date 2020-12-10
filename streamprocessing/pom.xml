@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.4.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.covidnotifier</groupId>
 	<artifactId>streamprocessing</artifactId>
@@ -16,7 +16,11 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>11.0.9.1</java.version>
+		<java.version>1.8</java.version>
+		<maven.test.skip>true</maven.test.skip>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 
@@ -24,6 +28,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.2.4.RELEASE</version>
 		</dependency>
 
 		<dependency>
@@ -90,25 +95,36 @@
 	</dependencies>
 
 
+
+
+
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+	<finalName>${project.artifactId}</finalName>
+	<plugins>
+	<plugin>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-maven-plugin</artifactId>
+		<version>2.2.4.RELEASE</version>
+		<executions>
+			<execution>
+				<goals>
+					<goal>repackage</goal>
+				</goals>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
+					<mainClass>com.covidnotifier.streamprocessing.StreamprocessingApplication</mainClass>
 				</configuration>
-			</plugin>
-		</plugins>
+			</execution>
+		</executions>
+	</plugin>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-failsafe-plugin</artifactId>
+		<version>2.22.2</version>
+
+	</plugin>
+	</plugins>
+
 	</build>
-
-
 
 
 </project>
