@@ -6,6 +6,11 @@
 - Navigate to the project directory
 
         mvn clean package spring-boot:repackage
+
+## Run the Jar
+- Navigate to the target directory
+
+        java -jar streamprocessing.jar
         
 ## Local Kafka
 
