@@ -111,7 +111,7 @@
 					<goal>repackage</goal>
 				</goals>
 				<configuration>
-					<mainClass>com.covidnotifier.streamprocessing.StreamprocessingApplication</mainClass>
+					<mainClass>de.tu_berlin.mpds.covid_notifier.CovidNotifierApplication</mainClass>
 				</configuration>
 			</execution>
 		</executions>
