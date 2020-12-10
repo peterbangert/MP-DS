@@ -18,7 +18,7 @@ public class Redis {
 
         private Connector() {
 
-            this.jedis = new Jedis("localhost", 6379, 1800);
+            this.jedis = new Jedis("redis", 6379, 1800);
         }
 
 

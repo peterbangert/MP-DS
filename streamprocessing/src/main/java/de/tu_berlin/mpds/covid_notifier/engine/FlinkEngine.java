@@ -41,7 +41,7 @@ public class FlinkEngine {
 
     @Bean
     public void setProperties() {
-        properties.setProperty("bootstrap.servers", "localhost:9092");
+        properties.setProperty("bootstrap.servers", "kafka:9092");
         properties.setProperty("group.id", "covidAnalyser");
     }
 
