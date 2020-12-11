@@ -20,4 +20,10 @@ public class KafkaProducerProps {
     private String clientIdConfig;
 
     private String acksConfig;
+
+    private int maxRequestSize;
+
+    private long bufferMemory;
+
+    private int batchSize;
 }

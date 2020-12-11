@@ -43,11 +43,18 @@ public class DomainEventPublisher {
         String BOOTSTRAP_SERVERS = this.kafkaProducerProps.getBootstrapServer();
         String CLIENT_ID_CONFIG = this.kafkaProducerProps.getClientIdConfig();
         String ACK_CONFIG = this.kafkaProducerProps.getAcksConfig();
+        int MAX_REQUEST_SIZE = this.kafkaProducerProps.getMaxRequestSize();
+        long BUFFER_MEMORY = this.kafkaProducerProps.getBufferMemory();
+        int BATCH_SIZE = this.kafkaProducerProps.getBatchSize();
+
 
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, CLIENT_ID_CONFIG);
         props.put(ProducerConfig.ACKS_CONFIG, ACK_CONFIG);
+        props.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, MAX_REQUEST_SIZE);
+        props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, BUFFER_MEMORY);
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, BATCH_SIZE);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         SenderOptions<String, DomainEvent> senderOptions = SenderOptions.create(props);
