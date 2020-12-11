@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -88,6 +91,11 @@ public class FlinkEngine {
 
     @Bean
     public void highRiskContactProducer() throws Exception {
+        env.setRestartStrategy(RestartStrategies.failureRateRestart(
+            3, // max failures per interval
+            Time.of(5, TimeUnit.MINUTES), //time interval for measuring failure rate
+            Time.of(10, TimeUnit.SECONDS) // delay
+        ));
         FlinkKafkaConsumer<String> covidSource = new FlinkKafkaConsumer<>(
                 "covid",
                 new SimpleStringSchema(),
