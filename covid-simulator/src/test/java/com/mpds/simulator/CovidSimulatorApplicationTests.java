@@ -277,7 +277,6 @@ class CovidSimulatorApplicationTests {
                 j++;
             }
         }*/
-
         for(int i = 1; i < 6000000; i++){
             grid.insertPerson(new Person(i, null, 0));
         }

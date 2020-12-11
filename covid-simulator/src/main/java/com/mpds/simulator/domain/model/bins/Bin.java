@@ -5,19 +5,35 @@ import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
 import com.mpds.simulator.domain.model.datastructures.CustomLinkedList;
 import com.mpds.simulator.domain.model.datastructures.PersonNode;
+import com.mpds.simulator.domain.model.events.DomainEvent;
+import com.mpds.simulator.domain.model.events.InfectionReported;
+import com.mpds.simulator.domain.model.events.PersonContact;
+import com.mpds.simulator.domain.model.events.PersonHealed;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.metrics.stats.Count;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.concurrent.CountDownLatch;
 
 @Data
 @Slf4j
 public abstract class Bin {
+
+    private final DomainEventPublisher domainEventPublisher;
 
     protected Coordinate ulCorner;
     protected Coordinate lrCorner;
     protected CustomLinkedList people;
     protected CustomLinkedList toBeAdded;
 
-    public Bin(Coordinate ulCorner, Coordinate lrCorner){
+    public Bin(DomainEventPublisher domainEventPublisher, Coordinate ulCorner, Coordinate lrCorner){
+        this.domainEventPublisher=domainEventPublisher;
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
 
@@ -75,11 +91,45 @@ public abstract class Bin {
         }
     }
 
+    public Mono<Void> possibleInfectionReactive(long time, Person potentiallyInfected, int distance, CountDownLatch latch){
+        if(sampleInfection(distance)){
+            potentiallyInfected.setInfected(GridBins.infectionTime + 2);
+//            publishInfection(potentiallyInfected.getId());
+            return publishInfectionReactive(time, potentiallyInfected.getId(), latch);
+
+        }
+        return Mono.empty();
+    }
 
     public static void publishContact(int id1, int id2){
         //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
         //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
+    }
+
+
+    public Mono<Void> publishContactReactive(long time, int id1, int id2, CountDownLatch latch){
+        DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        return this.domainEventPublisher.publishEvent(personContactEvent, latch);
+
+        //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
+        //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
+    }
+
+    public Mono<Void> publishInfectionReactive(long time, int id, CountDownLatch latch){
+        //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
+        //System.out.println("infection: " + String.valueOf(id));
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        return this.domainEventPublisher.publishEvent(domainEvent, latch);
+    }
+
+    public Mono<Void> publishHealed(long time, int id, CountDownLatch latch){
+        //log.info("Person healed: " + id);
+        //System.out.println("healed: " + id);
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        return this.domainEventPublisher.publishEvent(domainEvent, latch);
+        //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
     public static void publishInfection(int id){
@@ -116,12 +166,81 @@ public abstract class Bin {
         }
     }
 
+    public Mono<Void> calcInteractionsReactive(long time, Person person1, Person person2, CountDownLatch latch){
+
+        int distance = person1.getPos().distanceTo(person2.getPos());
+
+        if (distance <= GridBins.infectionDistance){
+
+            return publishContactReactive(time, person1.getId(), person2.getId(), latch)
+                    .flatMap(unused -> {
+                        if (person1.getInfected() > 0){
+                            if(person2.getInfected() <= 0 && person1.getInfected() <= GridBins.infectionTime){
+//                                possibleInfection(person2, distance);
+                                return possibleInfectionReactive(time, person2, distance, latch);
+                            }
+                        } else {
+                            if (person2.getInfected() > 0 && person2.getInfected() <= GridBins.infectionTime){
+//                                possibleInfection(person1, distance);
+                                return possibleInfectionReactive(time, person1, distance, latch);
+                            }
+                        }
+                        return Mono.empty();
+                    });
+
+        }
+        return Mono.empty();
+    }
+
+//    public Mono<Void> calcInteractionsReactive(Person person1, Person person2){
+//
+//        int distance = person1.getPos().distanceTo(person2.getPos());
+//
+//        if (distance <= GridBins.infectionDistance){
+//            publishContact(person1.getId(), person2.getId());
+//
+//            if (person1.getInfected() > 0){
+//                if(person2.getInfected() <= 0 && person1.getInfected() <= GridBins.infectionTime){
+//                    possibleInfection(person2, distance);
+//                }
+//            } else {
+//                if (person2.getInfected() > 0 && person2.getInfected() <= GridBins.infectionTime){
+//                    possibleInfection(person1, distance);
+//                }
+//            }
+//        }
+//    }
+
     public void interactionWithPeople(Person person){
         Person iterNode = people.getStart();
         while (iterNode != null){
             calcInteractions(person, iterNode);
             iterNode = iterNode.getNext();
         }
+    }
+
+    public Mono<Void> interactionWithPeopleReactive(long time, Person person, CountDownLatch latch){
+        Person iterNode = people.getStart();
+
+        Flux.
+        return Flux.create(fluxSink -> {
+            while (iterNode != null){
+                calcInteractionsReactive(time, person, iterNode, latch)
+                .flatMap(unused -> {
+
+                });
+
+                iterNode = iterNode.getNext();
+            }
+//            while(true) {
+//                fluxSink.next(System.currentTimeMillis());
+//            }
+        });
+//        while (iterNode != null){
+//            calcInteractionsReactive(time, person, iterNode, latch);
+//
+//            iterNode = iterNode.getNext();
+//        }
     }
 
 
@@ -191,6 +310,31 @@ public abstract class Bin {
 
         if(currentPerson == null){
             return;
+        }
+
+        Person beforePerson = iterateStart(currentPerson);
+
+        if (beforePerson == null){
+            return;
+        }
+
+        currentPerson = beforePerson.getNext();
+
+        if(currentPerson == null){
+            return;
+        }
+        iterateRest(beforePerson, currentPerson);
+    }
+
+    public Flux<Void> iterateReactive(long time){
+
+
+        Person currentPerson = people.getStart();
+
+        if(currentPerson == null){
+
+            return Flux.empty();
+//            return;
         }
 
         Person beforePerson = iterateStart(currentPerson);

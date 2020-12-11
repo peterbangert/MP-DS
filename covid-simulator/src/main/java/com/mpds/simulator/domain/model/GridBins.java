@@ -7,6 +7,7 @@ import com.mpds.simulator.domain.model.datastructures.PersonNode;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
+import reactor.core.publisher.Flux;
 
 @Data
 public class GridBins {
@@ -224,7 +225,24 @@ public class GridBins {
         }*/
     }
 
-    public void iteration(int time){
+    public Flux<Void> iteration(long time){
+        //1.
+        Flux.range(0, binsPerRow/2).flatMap(r -> Flux.range(0, binsPerCol).flatMap(c -> {
+            bins[r*2][c].iterateReactive(time);
+        }));
+// 2.
+//        Flux.range(1, binsPerRow/2).flatMap(r -> {
+//            return Flux.range(0, binsPerCol).flatMap(c -> {
+//                bins[r*2][c].iterate();
+//            })
+//        })
+
+
+//        Flux.range(0, binsPerRow).flatMap(r -> {
+//            return Flux.range(0, binsPerCol).flatMap(c -> {
+//                bins[r][c].addNewPeople();
+//            })
+//        })
         for(int r=0; r<binsPerRow; r+=2) {
             for (int c = 0; c < binsPerCol; c++) {
                 //bins[r][c].setTime(time);
