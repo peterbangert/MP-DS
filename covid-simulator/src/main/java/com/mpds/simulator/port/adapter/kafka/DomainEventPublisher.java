@@ -60,7 +60,7 @@ public class DomainEventPublisher {
         props.put(ProducerConfig.BATCH_SIZE_CONFIG, BATCH_SIZE);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-        SenderOptions<Object, Object> senderOptions = SenderOptions.create(props).scheduler(Schedulers.immediate());
+        SenderOptions<Object, Object> senderOptions = SenderOptions.create(props).maxInFlight((int) BUFFER_MEMORY).scheduler(Schedulers.immediate());
 
         sender = KafkaSender.create(senderOptions);
         dateFormat = new SimpleDateFormat("HH:mm:ss:SSS z dd MMM yyyy");
