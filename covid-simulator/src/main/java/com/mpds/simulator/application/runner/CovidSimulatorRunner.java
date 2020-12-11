@@ -92,10 +92,9 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
 
         latch.await();
+        if (completionTime == 0) this.completionTime = System.currentTimeMillis();
 
         disposable.dispose();
-
-        if (completionTime == 0) this.completionTime = System.currentTimeMillis();
 
         long elasped = completionTime - start;
         double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
