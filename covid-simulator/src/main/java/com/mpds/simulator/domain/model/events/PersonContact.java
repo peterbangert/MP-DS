@@ -21,8 +21,8 @@ public class PersonContact extends DomainEvent {
 
 
     @JsonCreator
-    public PersonContact(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("person1") Long person1, @JsonProperty("person2") Long person2, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(UUID.randomUUID(), sequenceNumber, occurredOn);
+    public PersonContact(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("person1") Long person1, @JsonProperty("person2") Long person2, @JsonProperty("city") String city, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
+        super(UUID.randomUUID(), sequenceNumber, city, occurredOn);
         this.person1=person1;
         this.person2=person2;
     }

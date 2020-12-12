@@ -11,13 +11,12 @@ public class PerformanceCallback implements Callback {
     public void onCompletion(RecordMetadata metadata, Exception exception) {
         Stats.eventsCount++;
 
-        // Measure throughput (messages/seconds) every 100000 events
         if(Stats.eventsCount == 300000) {
             long currentTime=System.currentTimeMillis();
             long elasped = currentTime - Stats.startTime;
             double eventsPerSec = 1000.0 * Stats.eventsCount / (double) elasped;
-            log.info("EventsCount: " + Stats.eventsCount);
-            log.info("Current throughput for every 100000 events (events/seconds): " + eventsPerSec);
+            log.info("Number of events published: " + Stats.eventsCount);
+            log.info("Throughput for the first 300000 published events: " + eventsPerSec);
         }
     }
 }

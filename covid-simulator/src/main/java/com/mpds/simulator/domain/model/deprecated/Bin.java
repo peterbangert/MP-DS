@@ -1,5 +1,6 @@
 package com.mpds.simulator.domain.model.deprecated;
 
+import com.mpds.simulator.application.runner.CovidSimulatorRunner;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
@@ -63,14 +64,14 @@ public class Bin {
 
     public void publishInfection(int id){
         //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
-        DomainEvent domainEvent = new InfectionReported(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
     public void publishHealed(int id){
         log.info("Person healed: " + id);
         System.out.println("healed: " + id);
-        DomainEvent domainEvent = new PersonHealed(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
