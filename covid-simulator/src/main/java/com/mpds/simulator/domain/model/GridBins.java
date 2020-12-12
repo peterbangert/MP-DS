@@ -1,7 +1,7 @@
 package com.mpds.simulator.domain.model;
 
 import com.mpds.simulator.domain.model.events.DomainEvent;
-import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisherReactive;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class GridBins {
     private final List<DomainEvent> domainEventList;
 
 
-    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
+    public GridBins(DomainEventPublisherReactive domainEventPublisherReactive, Coordinate size, Coordinate binSize, Coordinate overlapSize, int infectionDistance, int infectionTime){
         this.domainEventList = new ArrayList<>();
         this.size = size;
         this.binSize = binSize;
@@ -48,7 +48,7 @@ public class GridBins {
             for(int c=0; c<binsPerCol-1; c++){
                 upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                 lowerRight = new Coordinate(binSize.getRow() * (r+1) - 1, binSize.getCol() * (c+1) - 1);
-                bins[r][c] = new Bin(upperLeft, lowerRight, overlapSize, infectionDistance, infectionTime, this, domainEventPublisher);
+                bins[r][c] = new Bin(upperLeft, lowerRight, overlapSize, infectionDistance, infectionTime, this, domainEventPublisherReactive);
             }
         }
 
@@ -56,20 +56,20 @@ public class GridBins {
         for(int r=0; r<binsPerRow-1; r++){
             upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * (binsPerCol-1));
             lowerRight = new Coordinate(binSize.getRow() * (r+1)-1, size.getCol()-1);
-            bins[r][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.getRow(), 0), infectionDistance, infectionTime,this, domainEventPublisher);
+            bins[r][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(overlapSize.getRow(), 0), infectionDistance, infectionTime,this, domainEventPublisherReactive);
         }
 
         // Special case last row
         for(int c=0; c<binsPerCol-1; c++){
             upperLeft = new Coordinate(binSize.getRow() * (binsPerRow-1), binSize.getCol() * c);
             lowerRight = new Coordinate(size.getRow()-1, binSize.getCol() * (c+1) -1);
-            bins[binsPerRow-1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.getCol()), infectionDistance, infectionTime,this, domainEventPublisher);
+            bins[binsPerRow-1][c] = new Bin(upperLeft, lowerRight, new Coordinate(0, overlapSize.getCol()), infectionDistance, infectionTime,this, domainEventPublisherReactive);
         }
 
         // Special case lowest left bin
         upperLeft = new Coordinate(binSize.getRow() * (binsPerRow-1), binSize.getCol() * (binsPerCol - 1));
         lowerRight = new Coordinate(size.getRow()-1, size.getCol()-1);
-        bins[binsPerRow-1][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, infectionTime, this, domainEventPublisher);
+        bins[binsPerRow-1][binsPerCol-1] = new Bin(upperLeft, lowerRight, new Coordinate(0, 0), infectionDistance, infectionTime, this, domainEventPublisherReactive);
     }
 
     public void insertPerson(Person person){

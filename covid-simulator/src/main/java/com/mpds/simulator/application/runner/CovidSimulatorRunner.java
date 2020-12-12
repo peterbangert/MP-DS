@@ -8,7 +8,9 @@ import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
 import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.domain.model.events.PersonContact;
+import com.mpds.simulator.domain.model.stats.Stats;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisherReactive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -19,7 +21,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderOptions;
@@ -57,22 +58,72 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 
     private final DomainEventPublisher domainEventPublisher;
 
+    private final DomainEventPublisherReactive domainEventPublisherReactive;
+
     private final List finalDomainList = new ArrayList();
 
-    private long start;
-    private long completionTime;
+    private Stats stats;
+
+    public static long start;
+    public static long completionTime;
+
+    public static long listSize;
+
+//    @Override
+//    public void run(String... args) throws Exception {
+////        sendBytes();
+//        log.info("Start simulating COVID19 cases...");
+//        Coordinate size = new Coordinate(this.gridRows, this.gridColumns);
+//        Coordinate binSize = new Coordinate(this.binRows, this.binColumns);
+//        Coordinate overlap = new Coordinate(this.infectionDistance, this.infectionDistance);
+//        GridBins grid = new GridBins(this.domainEventPublisherReactive, size, binSize, overlap, this.infectionDistance, 30);
+//        grid.insertPerson(new Person(0, null, 100, size));
+//
+//        Scheduler newBoundedElastic = Schedulers.newBoundedElastic(100, 500000, "Custom-Elastic-Thread");
+//        // Simulate 1000 persons
+//        for (int i = 1; i < this.numberOfPeople; i++) {
+//            grid.insertPerson(new Person(i, null, 0, size));
+//        }
+//        for (int i = 0; i < 2; i++) {
+//            grid.iteration(i);
+//
+//            List<DomainEvent> toBePublishedEvents = grid.getDomainEventList();
+//
+//            this.finalDomainList.addAll(toBePublishedEvents);
+//        }
+//        System.out.println("Running producer performance test using non-reactive API, class=" + this.getClass().getSimpleName() + " messageSize=" + finalDomainList.size());
+//        System.out.println("++Events:      " + finalDomainList.size());
+//        CountDownLatch latch = new CountDownLatch(finalDomainList.size());
+//        Flux flux = Flux.fromIterable(finalDomainList);
+//        this.start = System.currentTimeMillis();
+//        Disposable disposable = this.domainEventPublisherReactive.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
+//
+//        latch.await();
+//        if (completionTime == 0) this.completionTime = System.currentTimeMillis();
+//
+//        disposable.dispose();
+//
+//        long elasped = completionTime - start;
+//        double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
+//        System.out.println("Records/s: " + recordsPerSec);
+//
+//
+////        disposable.dispose();
+//        System.out.println("DONE!!!");
+//
+//    }
 
     @Override
     public void run(String... args) throws Exception {
+        stats = new Stats();
 //        sendBytes();
         log.info("Start simulating COVID19 cases...");
         Coordinate size = new Coordinate(this.gridRows, this.gridColumns);
         Coordinate binSize = new Coordinate(this.binRows, this.binColumns);
         Coordinate overlap = new Coordinate(this.infectionDistance, this.infectionDistance);
-        GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, overlap, this.infectionDistance, 30);
+        GridBins grid = new GridBins(this.domainEventPublisherReactive, size, binSize, overlap, this.infectionDistance, 30);
         grid.insertPerson(new Person(0, null, 100, size));
 
-        Scheduler newBoundedElastic = Schedulers.newBoundedElastic(100, 500000, "Custom-Elastic-Thread");
         // Simulate 1000 persons
         for (int i = 1; i < this.numberOfPeople; i++) {
             grid.insertPerson(new Person(i, null, 0, size));
@@ -85,24 +136,31 @@ public class CovidSimulatorRunner implements CommandLineRunner {
             this.finalDomainList.addAll(toBePublishedEvents);
         }
         System.out.println("Running producer performance test using non-reactive API, class=" + this.getClass().getSimpleName() + " messageSize=" + finalDomainList.size());
-        System.out.println("++Events:      " + finalDomainList.size());
-        CountDownLatch latch = new CountDownLatch(finalDomainList.size());
-        Flux flux = Flux.fromIterable(finalDomainList);
+        listSize=finalDomainList.size();
+        System.out.println("++Events:      " + listSize);
+//        CountDownLatch latch = new CountDownLatch(finalDomainList.size());
         this.start = System.currentTimeMillis();
-        Disposable disposable = this.domainEventPublisher.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
+        finalDomainList.forEach(domainEvent -> {
+            this.domainEventPublisher.publishAsByteEvents((DomainEvent) domainEvent, stats);
+        });
+//        Flux flux = Flux.fromIterable(finalDomainList);
+//        this.start = System.currentTimeMillis();
+//        Disposable disposable = this.domainEventPublisherReactive.publishAsByteEvents(flux, latch).publishOn(Schedulers.parallel()).subscribe();
+//
+//        latch.await();
 
-        latch.await();
-        if (completionTime == 0) this.completionTime = System.currentTimeMillis();
-
-        disposable.dispose();
-
-        long elasped = completionTime - start;
-        double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
-        System.out.println("Records/s: " + recordsPerSec);
-
-
-//        disposable.dispose();
-        System.out.println("DONE!!!");
+//        if (completionTime == 0)
+//            this.completionTime = System.currentTimeMillis();
+//
+////        disposable.dispose();
+//
+//        long elasped = completionTime - start;
+//        double recordsPerSec = 1000.0 * this.finalDomainList.size() / (double) elasped;
+//        System.out.println("Records/s: " + recordsPerSec);
+//
+//
+////        disposable.dispose();
+//        System.out.println("DONE!!!");
 
     }
 
@@ -112,7 +170,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 //        System.out.println(objectMapper.writeValueAsString(domainEvent).getBytes().length);
 //        byte[] payload = objectMapper.writeValueAsString(domainEvent).getBytes();
 
-        int numRecords=50000;
+        int numRecords = 50000;
         CountDownLatch latch = new CountDownLatch(numRecords);
         int recordSize = 507;
         Random random = new Random(0);
@@ -149,7 +207,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
                         e.printStackTrace();
                     }
                     ProducerRecord<byte[], byte[]> record = new ProducerRecord<>("covid", payload);
-                        return SenderRecord.create(record, i);
+                    return SenderRecord.create(record, i);
 
 //                    ProducerRecord<Byte, Byte> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), domainEvent);
 

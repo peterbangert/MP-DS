@@ -3,9 +3,7 @@ package com.mpds.simulator;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
-import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
 //@SpringBootTest

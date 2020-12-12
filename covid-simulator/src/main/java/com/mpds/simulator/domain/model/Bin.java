@@ -4,7 +4,7 @@ import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.domain.model.events.InfectionReported;
 import com.mpds.simulator.domain.model.events.PersonContact;
 import com.mpds.simulator.domain.model.events.PersonHealed;
-import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisherReactive;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,13 +27,13 @@ public class Bin {
     private int infectionDistance;
     private int infectionTime;
     private int time;
-    private DomainEventPublisher publisher;
+    private DomainEventPublisherReactive publisher;
 
     private ArrayList<Person[]> contacts;
 
     private ArrayList<DomainEvent> domainEventsList;
 
-    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, int infectionTime, GridBins grid, DomainEventPublisher publisher){
+    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize, int infectionDistance, int infectionTime, GridBins grid, DomainEventPublisherReactive publisher){
         this.domainEventsList = new ArrayList<>();
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
