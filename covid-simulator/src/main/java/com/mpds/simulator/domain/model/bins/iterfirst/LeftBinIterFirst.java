@@ -3,35 +3,35 @@ package com.mpds.simulator.domain.model.bins.iterfirst;
 
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.Person;
-import com.mpds.simulator.domain.model.bins.Bin;
 import com.mpds.simulator.domain.model.bins.LeftBin;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 
 
 public class LeftBinIterFirst extends LeftBin {
 
-    public LeftBinIterFirst(Coordinate ulCorner, Coordinate lrCorner){
-        super(ulCorner, lrCorner);
+    public LeftBinIterFirst(DomainEventPublisher domainEventPublisher, Coordinate ulCorner, Coordinate lrCorner){
+        super(domainEventPublisher, ulCorner, lrCorner);
     }
 
     @Override
-    public void findInteractionsWithNeighbours(Person person) {
+    public void findInteractionsWithNeighbours(long time, Person person) {
 
         Coordinate pos = person.getPos();
 
         if (isOverlapRight(pos)){
-            right.interactionWithPeople(person);
+            right.interactionWithPeople(time, person);
         }
         if(isOverlapBelowRight(pos)){
-            belowRight.interactionWithPeople(person);
+            belowRight.interactionWithPeople(time, person);
         }
         if(isOverlapBelow(pos)){
-            below.interactionWithPeople(person);
+            below.interactionWithPeople(time, person);
         }
         if(isOverlapAbove(pos)){
-            above.interactionWithPeople(person);
+            above.interactionWithPeople(time, person);
         }
         if(isOverlapAboveRight(pos)){
-            aboveRight.interactionWithPeople(person);
+            aboveRight.interactionWithPeople(time, person);
         }
     }
 }

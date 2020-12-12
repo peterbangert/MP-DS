@@ -1,9 +1,9 @@
 package com.mpds.simulator.application.runner;
 
-import com.mpds.simulator.application.service.SequenceManager;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
+import com.mpds.simulator.domain.model.stats.Stats;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +34,8 @@ public class CovidSimulatorRunner implements CommandLineRunner {
     @Value("${simulator.infection.distance}")
     private int infectionDistance;
 
+//    private final DomainEventPublisherReactive domainEventPublisherReactive;
+
     private final DomainEventPublisher domainEventPublisher;
 
     @Override
@@ -46,10 +48,11 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         //grid.insertPerson(new Person(0, null, 100));
         // Simulate 1000 persons
         for(int i=1; i<this.numberOfPeople; i++){
-        //    grid.insertPerson(new Person(i, null, 0));
+            grid.insertPerson(new Person(i, null, 0));
         }
         // Run forever to imitate a never ending stream of events
         int time = 0;
+        Stats.startTime=System.currentTimeMillis();
         while (true) {
 //            System.out.println("Current Sequence: " + SequenceManager.currentSequenceNumber);
             grid.iteration(time);

@@ -3,14 +3,15 @@ package com.mpds.simulator.domain.model.bins;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 
 public abstract class TopLeft extends Bin{
     protected Bin right;
     protected Bin belowRight;
     protected Bin below;
 
-    public TopLeft(Coordinate ulCorner, Coordinate lrCorner){
-        super(ulCorner, lrCorner);
+    public TopLeft(DomainEventPublisher domainEventPublisher, Coordinate ulCorner, Coordinate lrCorner){
+        super(domainEventPublisher, ulCorner, lrCorner);
     }
 
     @Override

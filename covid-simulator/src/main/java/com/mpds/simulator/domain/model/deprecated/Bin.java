@@ -3,13 +3,12 @@ package com.mpds.simulator.domain.model.deprecated;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
-import com.mpds.simulator.domain.model.datastructures.LinkedListNode;
 import com.mpds.simulator.domain.model.deprecated.datastructures.BinarySearchLeaf;
 import com.mpds.simulator.domain.model.deprecated.datastructures.BinarySearchTree2d;
 import com.mpds.simulator.domain.model.events.DomainEvent;
 import com.mpds.simulator.domain.model.events.InfectionReported;
 import com.mpds.simulator.domain.model.events.PersonHealed;
-import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisherReactive;
 import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ public class Bin {
     private long time;
     private int gridSizeRow;
     private int gridSizeCol;
-    private DomainEventPublisher publisher;
+    private DomainEventPublisherReactive publisher;
     private XorShift1024StarPhiRandom randomGen;
 
     private ArrayList<Person[]> contacts;
@@ -41,7 +40,7 @@ public class Bin {
     private BinarySearchTree2d searchTree;
     private BinarySearchLeaf firstLeaf;
 
-    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize , GridBins grid, int searchTreeBinSize, DomainEventPublisher publisher){
+    public Bin(Coordinate ulCorner, Coordinate lrCorner, Coordinate overlapSize , GridBins grid, int searchTreeBinSize, DomainEventPublisherReactive publisher){
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
         overlapCorner = this.lrCorner.addCoordinate(overlapSize);
