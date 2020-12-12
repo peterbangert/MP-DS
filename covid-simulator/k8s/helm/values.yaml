@@ -19,9 +19,9 @@ kafka:
   topic: covid
   clientId: covid-simulator-1
   acksConfig: 0
-  maxRequestSize: 256000
-  bufferMemory: 33554432
-  batchSize: 2048000
+  maxRequestSize: "256000"
+  bufferMemory: "33554432"
+  batchSize: "2048000"
   lingerMs: 10
 simulator:
   numberOfPeople: 1000

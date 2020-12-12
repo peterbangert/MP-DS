@@ -20,7 +20,42 @@ docker run -d -e ADV_HOST=127.0.0.1 -e EULA="[CHECK_YOUR_EMAIL_FOR_PERSONAL_ID]"
 * Start the application through the IDE (play button) or through the gradle task ./gradlew bootRun using the cli
 * By default, the application will run under port 8080
 
-### Links
+## Building and Deployment
+* Make sure that the version and target image repository properties are set properly on the covid-simulator/build.gradle file
+* Make sure that docker credentials are configured properly, use the following command if the image should be pushed to Google Container Registry (GCR):
+```
+gcloud auth configure-docker
+```
+* Run the following command on the home directory o`f the simulator project to build and push the Docker image on Mac/Linux:
+```
+./gradlew clean jib
+```
+* Run the following command on the home directory of the simulator project to build and push the Docker image on Windows:
+```
+gradlew.bat clean jib
+```
+* Get the credentials from the Google Kubernetes Engine:
+```
+gcloud container clusters get-credentials --project mpds-297011 --region europe-west3-c  mpds-cluster
+```
+* Use the Helm charts under covid-simulator/k8s/helm to do a deployment on the Kubernetes Cluster, e.g.:
+```
+helm install covid-simulator .
+```
+* Use the Helm charts under covid-simulator/k8s/helm to upgrade the deployment of the simulator on the Kubernetes Cluster, e.g.:
+```
+helm install upgrade -f override.yaml covid-simulator .
+```
+* Use the Helm charts under covid-simulator/k8s/helm to uninstall the deployment of the simulator on the Kubernetes Cluster, e.g.:
+```
+helm uninstall covid-simulator
+```
+
+### Links`
+* Kafka Performance Tuning — Ways for Kafka Optimization: https://medium.com/@rinu.gour123/kafka-performance-tuning-ways-for-kafka-optimization-fdee5b19505b
+* Using Helm and Kubernetes: https://www.baeldung.com/kubernetes-helm
+* Jib - Containerize your Gradle Java project: https://github.com/GoogleContainerTools/jib/tree/master/jib-gradle-plugin#quickstart
+* Dockerizing Java Apps using Jib: https://www.baeldung.com/jib-dockerizing
 * Kafka for development: https://lenses.io/box/
 * Reactive Programming with Project Reactor: https://projectreactor.io/
 * Reactor Kafka Reference Guide: https://projectreactor.io/docs/kafka/release/reference/

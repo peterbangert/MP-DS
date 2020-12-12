@@ -30,4 +30,3 @@ spec:
         ports:
         - containerPort: {{ .Values.app.port }}
           name: app
-  

@@ -4,23 +4,23 @@ apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-config
 data:
-  APP_PORT: {{ .Values.app.port }}
-  LOGGING_LEVEL: {{ .Values.app.loggingLevel }}
-  SPRING_PROFILES_ACTIVE: {{ .Values.spring.profile }}
-  KAFKA_BOOTSTRAP_SERVER_HOST: {{ .Values.kafka.bootstrapServerHost }}
-  KAFKA_BOOTSTRAP_SERVER_PORT: {{ .Values.kafka.bootstrapServerPort }}
-  KAFKA_TOPIC: {{ .Values.kafka.topic }}
+  APP_PORT: {{ .Values.app.port | quote}}
+  LOGGING_LEVEL: {{ .Values.app.loggingLevel | quote}}
+  SPRING_PROFILES_ACTIVE: {{ .Values.spring.profile | quote}}
+  KAFKA_BOOTSTRAP_SERVER_HOST: {{ .Values.kafka.bootstrapServerHost | quote}}
+  KAFKA_BOOTSTRAP_SERVER_PORT: {{ .Values.kafka.bootstrapServerPort | quote}}
+  KAFKA_TOPIC: {{ .Values.kafka.topic | quote}}
   KAFKA_CLIENT_ID: {{ .Values.kafka.clientId }}
-  KAFKA_ACKS_CONFIG: {{ .Values.kafka.acksConfig }}
-  KAFKA_MAX_REQUEST_SIZE: {{ .Values.kafka.maxRequestSize}}
-  KAFKA_BUFFER_MEMORY: {{ .Values.kafka.bufferMemory }}
-  KAFKA_BATCH_SIZE: {{ .Values.kafka.batchSize }}
-  KAFKA_LINGER_MS: {{ .Values.kafka.lingerMs }}
-  SIMULATOR_NUMBER_OF_PEOPLE: {{ .Values.simulator.numberOfPeople}}
-  SIMULATOR_GRID_ROWS: {{ .Values.simulator.gridRows }}
-  SIMULATOR_GRID_COLUMNS: {{ .Values.simulator.gridColumns }}
-  SIMULATOR_BIN_ROWS: {{ .Values.simulator.binRows }}
-  SIMULATOR_BIN_COLUMNS: {{ .Values.simulator.binColumns}}
-  SIMULATOR_INFECTION_DISTANCE: {{ .Values.simulator.infectionDistance }}
-  SIMULATOR_CITY: {{ .Values.simulator.city }}
+  KAFKA_ACKS_CONFIG: {{ .Values.kafka.acksConfig | quote}}
+  KAFKA_MAX_REQUEST_SIZE: {{ .Values.kafka.maxRequestSize | quote}}
+  KAFKA_BUFFER_MEMORY: {{ .Values.kafka.bufferMemory | quote}}
+  KAFKA_BATCH_SIZE: {{ .Values.kafka.batchSize | quote}}
+  KAFKA_LINGER_MS: {{ .Values.kafka.lingerMs | quote}}
+  SIMULATOR_NUMBER_OF_PEOPLE: {{ .Values.simulator.numberOfPeople | quote}}
+  SIMULATOR_GRID_ROWS: {{ .Values.simulator.gridRows | quote}}
+  SIMULATOR_GRID_COLUMNS: {{ .Values.simulator.gridColumns | quote}}
+  SIMULATOR_BIN_ROWS: {{ .Values.simulator.binRows | quote}}
+  SIMULATOR_BIN_COLUMNS: {{ .Values.simulator.binColumns | quote}}
+  SIMULATOR_INFECTION_DISTANCE: {{ .Values.simulator.infectionDistance | quote}}
+  SIMULATOR_CITY: {{ .Values.simulator.city | quote}}
 
