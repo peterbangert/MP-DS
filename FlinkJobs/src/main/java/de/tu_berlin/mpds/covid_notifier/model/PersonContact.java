@@ -28,14 +28,15 @@ public class PersonContact extends DomainEvent {
                          @JsonProperty("sequenceNumber") Long sequenceNumber,
                          @JsonProperty("person1") Long person1,
                          @JsonProperty("person2") Long person2,
-                         @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(eventType, uuid, sequenceNumber, occurredOn);
+                         @JsonProperty("occurredOn") LocalDateTime occurredOn,
+                         @JsonProperty("city") String city) {
+        super(eventType, uuid, sequenceNumber, occurredOn,city);
         this.person1=person1;
         this.person2=person2;
     }
 
-    public PersonContact(String eventType, UUID uuid, Long sequenceNumber, LocalDateTime occurredOn) {
-        super(eventType, uuid, sequenceNumber, occurredOn);
+    public PersonContact(String eventType, UUID uuid, Long sequenceNumber, LocalDateTime occurredOn, String city) {
+        super(eventType, uuid, sequenceNumber, occurredOn, city);
     }
 
     @Override

@@ -26,14 +26,14 @@ public class InfectionReported extends DomainEvent {
                              @JsonProperty("uuid") UUID uuid,
                              @JsonProperty("sequenceNumber") Long sequenceNumber,
                              @JsonProperty("personId") Long personId,
-                             @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(eventType, uuid, sequenceNumber, occurredOn);
+                             @JsonProperty("occurredOn") LocalDateTime occurredOn,
+                             @JsonProperty("city") String city) {
+        super(eventType, uuid, sequenceNumber, occurredOn,city);
         this.personId=personId;
     }
 
-    public InfectionReported(String eventType, UUID uuid, Long sequenceNumber, LocalDateTime occurredOn, Long personId) {
-        super(eventType, uuid, sequenceNumber, occurredOn);
-        this.personId = personId;
+    public InfectionReported(String eventType, UUID uuid, Long sequenceNumber, LocalDateTime occurredOn, String city) {
+        super(eventType, uuid, sequenceNumber, occurredOn, city);
     }
 
     public Long getPersonId() {

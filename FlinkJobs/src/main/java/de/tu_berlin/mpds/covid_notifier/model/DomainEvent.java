@@ -28,7 +28,7 @@ public abstract class DomainEvent  {
      UUID uuid;
      Long sequenceNumber;
      String eventType;
-
+     String city;
     //@JsonIgnore
      LocalDateTime occurredOn;
 
@@ -36,11 +36,13 @@ public abstract class DomainEvent  {
     public DomainEvent(@JsonProperty("eventType") String eventType,
                        @JsonProperty("uuid") UUID uuid,
                        @JsonProperty("sequenceNumber") Long sequenceNumber,
-                       @JsonProperty("occurredOn") LocalDateTime occurredOn) {
+                       @JsonProperty("occurredOn") LocalDateTime occurredOn,
+                       @JsonProperty("city") String city) {
         this.eventType=eventType;
         this.uuid=uuid;
         this.sequenceNumber=sequenceNumber;
         this.occurredOn=occurredOn;
+        this.city =city;
     }
 
     @JsonProperty("eventType")
@@ -80,6 +82,14 @@ public abstract class DomainEvent  {
 
     public void setOccurredOn(LocalDateTime occurredOn) {
         this.occurredOn = occurredOn;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }
 
