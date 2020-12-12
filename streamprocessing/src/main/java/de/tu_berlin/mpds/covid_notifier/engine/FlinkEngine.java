@@ -20,6 +20,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -34,18 +35,27 @@ public class FlinkEngine {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    private Properties properties = new Properties();
+    @Autowired
+    private  StreamExecutionEnvironment env;
+
+    @Autowired
+    private Properties properties;
 
     final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
     };
 
 
     @Bean
-    public void setProperties() {
+    public StreamExecutionEnvironment env(){
+       env=  StreamExecutionEnvironment.getExecutionEnvironment();
+       return env;
+    }
+    @Bean
+    public Properties Properties() {
         properties.setProperty("bootstrap.servers", "kafka:9092");
         properties.setProperty("group.id", "covidAnalyser");
+        return properties;
     }
 
 

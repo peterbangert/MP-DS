@@ -16,10 +16,10 @@
 	<description>Traces Personal Contacts Regarding Covid Events</description>
 
 	<properties>
-		<java.version>11.0.9.1</java.version>
+		<java.version>1.8</java.version>
 		<maven.test.skip>true</maven.test.skip>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tomcat.version>8.0.30</tomcat.version>
 	</properties>
@@ -28,7 +28,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter</artifactId>
 			<version>2.2.4.RELEASE</version>
 			<exclusions>
 				<exclusion>
