@@ -17,8 +17,8 @@ public class PersonHealed extends DomainEvent{
     private final Long personId;
 
     @JsonCreator
-    public PersonHealed(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("personId") Long personId, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(UUID.randomUUID(), sequenceNumber, occurredOn);
+    public PersonHealed(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("personId") Long personId, @JsonProperty("city") String city, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
+        super(UUID.randomUUID(), sequenceNumber, city, occurredOn);
         this.personId=personId;
     }
 

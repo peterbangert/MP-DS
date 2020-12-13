@@ -1,12 +1,21 @@
 package com.mpds.simulator.domain.model.bins;
 
+import com.mpds.simulator.application.runner.CovidSimulatorRunner;
 import com.mpds.simulator.domain.model.Coordinate;
 import com.mpds.simulator.domain.model.GridBins;
 import com.mpds.simulator.domain.model.Person;
 import com.mpds.simulator.domain.model.datastructures.CustomLinkedList;
-import com.mpds.simulator.domain.model.datastructures.PersonNode;
+import com.mpds.simulator.domain.model.events.DomainEvent;
+import com.mpds.simulator.domain.model.events.InfectionReported;
+import com.mpds.simulator.domain.model.events.PersonContact;
+import com.mpds.simulator.domain.model.events.PersonHealed;
+import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Data
 @Slf4j
@@ -17,7 +26,10 @@ public abstract class Bin {
     protected CustomLinkedList people;
     protected CustomLinkedList toBeAdded;
 
-    public Bin(Coordinate ulCorner, Coordinate lrCorner){
+    private final DomainEventPublisher domainEventPublisher;
+
+    public Bin(DomainEventPublisher domainEventPublisher, Coordinate ulCorner, Coordinate lrCorner){
+        this.domainEventPublisher=domainEventPublisher;
         this.ulCorner = ulCorner;
         this.lrCorner = lrCorner;
 
@@ -57,8 +69,12 @@ public abstract class Bin {
         return (ulCorner.getCol() - pos.getCol()) + GridBins.infectionDistance > 0;
     }
 
+    //public boolean sampleInfection(int distance){
+    //    return GridBins.randomGen.nextInt(GridBins.infectionDistance*2) > distance + 1;
+    //}
+
     public boolean sampleInfection(int distance){
-        return GridBins.randomGen.nextInt(GridBins.infectionDistance*2) > distance + 1;
+        return true;
     }
 
     public void addPerson(Person pn){
@@ -68,123 +84,175 @@ public abstract class Bin {
     public void addToBeAdded(Person pn) {//System.out.println("moved bin: " + String.valueOf(pn.getId()));
     toBeAdded.addPerson(pn); }
 
-    public void possibleInfection(Person potentiallyInfected, int distance){
+    public void possibleInfection(long time, Person potentiallyInfected, int distance){
         if(sampleInfection(distance)){
-            potentiallyInfected.setInfected(GridBins.infectionTime + 2);
-            publishInfection(potentiallyInfected.getId());
+            potentiallyInfected.setInfected(GridBins.infectionTime + 1);
+            GridBins.roundInfections++;
+            //publishInfection(time, potentiallyInfected.getId());
         }
     }
 
 
-    public static void publishContact(int id1, int id2){
+    public void publishContact(long time, int id1, int id2){
         //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
-        //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
+        DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(personContactEvent);
+        GridBins.roundContacts++;
+//        this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
     }
 
-    public static void publishInfection(int id){
+    public void publishInfection(long time, int id){
         //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
         //System.out.println("infection: " + String.valueOf(id));
-        //DomainEvent domainEvent = new InfectionReported(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
-    public static void publishHealed(int id){
+    public void publishHealed(long time, int id){
         //log.info("Person healed: " + id);
         //System.out.println("healed: " + id);
-        //DomainEvent domainEvent = new PersonHealed(time, (long) id, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
+        GridBins.roundHealed++;
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
 
-    public void calcInteractions(Person person1, Person person2){
+    public void calcInteractions(long time, Person person1, Person person2){
+
+        int timeOfDay = (int) (time % GridBins.ticksPerDay);
+        if (person1.isAwake(timeOfDay) && person2.isAwake(timeOfDay)){
 
         int distance = person1.getPos().distanceTo(person2.getPos());
 
         if (distance <= GridBins.infectionDistance){
-            publishContact(person1.getId(), person2.getId());
+            publishContact(time, person1.getId(), person2.getId());
 
             if (person1.getInfected() > 0){
                 if(person2.getInfected() <= 0 && person1.getInfected() <= GridBins.infectionTime){
-                    possibleInfection(person2, distance);
+                    possibleInfection(time, person2, distance);
                 }
             } else {
                 if (person2.getInfected() > 0 && person2.getInfected() <= GridBins.infectionTime){
-                    possibleInfection(person1, distance);
+                    possibleInfection(time, person1, distance);
                 }
             }
         }
-    }
+    }}
 
-    public void interactionWithPeople(Person person){
+    public void interactionWithPeople(long time, Person person){
         Person iterNode = people.getStart();
         while (iterNode != null){
-            calcInteractions(person, iterNode);
+            calcInteractions(time, person, iterNode);
             iterNode = iterNode.getNext();
         }
     }
 
 
-    public abstract void findInteractionsWithNeighbours(Person person);
+    public abstract void findInteractionsWithNeighbours(long time, Person person);
 
-    public void findInteractions(Person currentPerson){
+    public void findInteractions(long time, Person currentPerson){
+
+        GridBins.roundPeopleIterated++;
         Person iterNode = currentPerson.getNext();
         while (iterNode != null){
-            calcInteractions(currentPerson, iterNode);
+            calcInteractions(time, currentPerson, iterNode);
             iterNode = iterNode.getNext();
         }
 
-        findInteractionsWithNeighbours(currentPerson);
+        findInteractionsWithNeighbours(time, currentPerson);
     }
 
     public abstract boolean movePerson(Person currentNode);
 
+    public void checkHealthStatus(long time, Person person){
 
-    public Person iterateStart(Person startPerson){
+        if (person.getInfected() == 1) {
+            publishHealed(time, person.getId());
+        } else if (person.getInfected() == GridBins.infectionTime + 1 - GridBins.publishInfectionAfterXTicks) {
+            publishInfection(time, person.getId());
+        }
+        person.decrementInfection();
+    }
+
+
+    public Person iterateStart(long time, Person startPerson){
+
+        checkHealthStatus(time, startPerson);
+
+        /*
+        if (!startPerson.isAwake((int) (time % GridBins.ticksPerDay))){
+            return startPerson;
+        }
+         */
+
         Person nextPerson = startPerson.getNext();
 
-        findInteractions(startPerson);
+        findInteractions(time, startPerson);
+
 
         while (movePerson(startPerson)){
             people.setStart(nextPerson);
-            if (nextPerson == null ){
+            if (nextPerson == null){
                 people.setEnd(null);
                 return null;
             }
             startPerson = nextPerson;
+            checkHealthStatus(time, startPerson);
+
+            /*if (!startPerson.isAwake((int) (time % GridBins.ticksPerDay))){
+                return startPerson;
+            }*/
+
             nextPerson = nextPerson.getNext();
-            findInteractions(startPerson);
+            findInteractions(time, startPerson);
         }
         return startPerson;
     }
 
-    public void iterateRest(Person beforePerson, Person middlePerson){
+    public void iterateRest(long time, Person beforePerson, Person middlePerson){
 
         Person nextPerson = middlePerson.getNext();
 
         while (nextPerson != null){
-            findInteractions(middlePerson);
-            int id_before = middlePerson.getNext().getId();
+            checkHealthStatus(time, middlePerson);
+
+            /*if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
+                beforePerson = middlePerson;
+                middlePerson = nextPerson;
+                nextPerson = nextPerson.getNext();
+                continue;
+            }*/
+
+            findInteractions(time, middlePerson);
+
             if (movePerson(middlePerson)){
                 beforePerson.setNext(nextPerson);
-                int id_after = -1;
-                if (middlePerson.getNext() != null){
-                    id_after = middlePerson.getNext().getId();
-                }
             } else {
                 beforePerson = middlePerson;
             }
+
             middlePerson = nextPerson;
             nextPerson = nextPerson.getNext();
         }
-        findInteractions(middlePerson);
+
+        checkHealthStatus(time, middlePerson);
+
+        /*if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
+            return;
+        }*/
+
+        findInteractions(time, middlePerson);
         if(movePerson(middlePerson)){
             beforePerson.setNext(null);
             people.setEnd(null);
         }
     }
 
-    public void iterate(){
+
+    public void iterate(long time){
+
 
         Person currentPerson = people.getStart();
 
@@ -192,7 +260,7 @@ public abstract class Bin {
             return;
         }
 
-        Person beforePerson = iterateStart(currentPerson);
+        Person beforePerson = iterateStart(time, currentPerson);
 
         if (beforePerson == null){
             return;
@@ -203,7 +271,7 @@ public abstract class Bin {
         if(currentPerson == null){
             return;
         }
-        iterateRest(beforePerson, currentPerson);
+        iterateRest(time, beforePerson, currentPerson);
     }
 
     /*

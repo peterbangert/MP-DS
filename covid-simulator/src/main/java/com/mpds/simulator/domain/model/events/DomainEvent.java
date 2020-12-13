@@ -29,6 +29,8 @@ public abstract class DomainEvent {
 
     private final Long sequenceNumber;
 
+    private final String city;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private final LocalDateTime occurredOn;
 

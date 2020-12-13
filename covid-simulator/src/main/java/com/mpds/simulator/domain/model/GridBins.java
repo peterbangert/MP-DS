@@ -3,7 +3,6 @@ package com.mpds.simulator.domain.model;
 import com.mpds.simulator.domain.model.bins.*;
 import com.mpds.simulator.domain.model.bins.iterfirst.*;
 import com.mpds.simulator.domain.model.bins.itersecond.*;
-import com.mpds.simulator.domain.model.datastructures.PersonNode;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
@@ -21,18 +20,30 @@ public class GridBins {
     public static int infectionTime;
     public static Coordinate size;
     public static XorShift1024StarPhiRandom randomGen;
+    public static int ticksPerDay;
+    public static int publishInfectionAfterXTicks;
 
+    public static int roundContacts = 0;
+    public static int roundInfections = 0;
+    public static int roundHealed = 0;
+    public static int roundPeopleIterated = 0;
 
-    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, int infectionDistance, int infectionTime) {
+    private final DomainEventPublisher domainEventPublisher;
 
+    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, int infectionDistance, int daysInfected, int ticksPerDay, int publishInfectionAfterXDays) {
+        this.domainEventPublisher=domainEventPublisher;
         this.size = size;
         this.binSize = binSize;
+        this.ticksPerDay = ticksPerDay;
         this.infectionDistance = infectionDistance;
-        this.infectionTime = infectionTime;
+        this.infectionTime = daysInfected * ticksPerDay;
+        this.publishInfectionAfterXTicks = publishInfectionAfterXDays * ticksPerDay;
+
         int rowResidual = size.getRow() % binSize.getRow();
         int colResidual = size.getCol() % binSize.getCol();
         boolean rowResidualTooSmall = rowResidual <= infectionDistance && rowResidual != 0;
         boolean colResidualTooSmall = colResidual <= infectionDistance && colResidual != 0;
+
         randomGen = new XorShift1024StarPhiRandom();
         randomGen.setSeed(0);
 
@@ -56,62 +67,62 @@ public class GridBins {
                 if (r == 0 && c == 0) {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, binSize.getCol() * (c + 1) - 1);
-                    bins[r][c] = new TopLeftBinIterFirst(upperLeft, lowerRight);
+                    bins[r][c] = new TopLeftBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                 } else if (r == 0 && c == binsPerCol - 1) {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, size.getCol() - 1);
-                    bins[r][c] = new TopRightBinIterFirst(upperLeft, lowerRight);
+                    bins[r][c] = new TopRightBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                 } else if (r == 0) {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, binSize.getCol() * (c + 1) - 1);
-                    bins[r][c] = new TopBinIterFirst(upperLeft, lowerRight);
+                    bins[r][c] = new TopBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                 } else if (r == binsPerRow - 1 && c == 0) {
                     upperLeft = new Coordinate(binSize.getRow() * (binsPerRow - 1), binSize.getCol() * c);
                     lowerRight = new Coordinate(size.getRow() - 1, binSize.getCol() * (c + 1) - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new BottomLeftBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new BottomLeftBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new BottomLeftBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new BottomLeftBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 } else if (r == binsPerRow - 1 && c == binsPerCol - 1) {
                     upperLeft = new Coordinate(binSize.getRow() * (binsPerRow - 1), binSize.getCol() * c);
                     lowerRight = new Coordinate(size.getRow() - 1, binSize.getCol() * (c + 1) - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new BottomRightBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new BottomRightBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new BottomRightBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new BottomRightBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 } else if (r == binsPerRow - 1) {
                     upperLeft = new Coordinate(binSize.getRow() * (binsPerRow - 1), binSize.getCol() * c);
                     lowerRight = new Coordinate(size.getRow() - 1, binSize.getCol() * (c + 1) - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new BottomBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new BottomBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new BottomBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new BottomBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 } else if (c == 0) {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, binSize.getCol() * (c + 1) - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new LeftBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new LeftBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new LeftBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new LeftBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 } else if (c == binsPerCol - 1) {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * (binsPerCol - 1));
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, size.getCol() - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new RightBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new RightBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new RightBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new RightBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 } else {
                     upperLeft = new Coordinate(binSize.getRow() * r, binSize.getCol() * c);
                     lowerRight = new Coordinate(binSize.getRow() * (r + 1) - 1, binSize.getCol() * (c + 1) - 1);
                     if (r % 2 == 0) {
-                        bins[r][c] = new MiddleBinIterFirst(upperLeft, lowerRight);
+                        bins[r][c] = new MiddleBinIterFirst(domainEventPublisher, upperLeft, lowerRight);
                     } else {
-                        bins[r][c] = new MiddleBinIterSecond(upperLeft, lowerRight);
+                        bins[r][c] = new MiddleBinIterSecond(domainEventPublisher, upperLeft, lowerRight);
                     }
                 }
             }
@@ -225,17 +236,17 @@ public class GridBins {
         }*/
     }
 
-    public void iteration(int time){
+    public void iteration(long time){
         for(int r=0; r<binsPerRow; r+=2) {
             for (int c = 0; c < binsPerCol; c++) {
                 //bins[r][c].setTime(time);
-                bins[r][c].iterate();
+                bins[r][c].iterate(time);
             }
         }
 
         for (int r=1; r<binsPerRow; r+=2){
             for (int c=0; c<binsPerCol; c++){
-                bins[r][c].iterate();
+                bins[r][c].iterate(time);
             }
         }
 
@@ -244,5 +255,10 @@ public class GridBins {
                 bins[r][c].addNewPeople();
             }
         }
+        System.out.println(String.format("Round %d - Time of Day %d:\ncontacts: %d\ninfections: %d\nhealed: %d\niterated through: %d\n", time, time%ticksPerDay, roundContacts, roundInfections, roundHealed, roundPeopleIterated));
+        roundContacts = 0;
+        roundInfections = 0;
+        roundHealed = 0;
+        roundPeopleIterated = 0;
     }
 }

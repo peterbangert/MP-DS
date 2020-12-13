@@ -10,9 +10,11 @@ public class Person {
     private Coordinate pos;
     private int infected;
     private Person next;
+    private short asleep;
+    private short awake;
     //private boolean reported;
 
-    public Person(int id, Coordinate position, int infected){
+    public Person(int id, Coordinate position, short infected, short asleep, short awake){
         this.id = id;
         pos = position;
         this.infected = infected;
@@ -21,11 +23,31 @@ public class Person {
             pos = new Coordinate(GridBins.randomGen.nextInt(GridBins.size.getRow()),
                     GridBins.randomGen.nextInt(GridBins.size.getCol()));
         }
+
+        if(asleep == -1 && awake == -1){
+            short first = (short) GridBins.randomGen.nextInt((GridBins.ticksPerDay*3) / 5);
+            short second = (short) GridBins.randomGen.nextInt((GridBins.ticksPerDay*3) / 5);
+
+            if (first <= second){
+                this.asleep = first;
+                this.awake = second;
+            } else {
+                this.asleep = second;
+                this.awake = first;
+            }
+        }
+
+        //System.out.println(asleep);
+        //System.out.println(awake);
         next = null;
     }
 
     public void decrementInfection(){
-        infected--;
+        if (infected > 0) {infected--;}
+    }
+
+    public boolean isAwake(int timeOfDay){
+        return timeOfDay >= awake || timeOfDay < asleep;
     }
 
     /*

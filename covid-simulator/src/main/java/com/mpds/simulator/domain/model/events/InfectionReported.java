@@ -19,8 +19,8 @@ public class InfectionReported extends DomainEvent {
     private final Long personId;
 
     @JsonCreator
-    public InfectionReported(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("personId") Long personId, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
-        super(UUID.randomUUID(), sequenceNumber, occurredOn);
+    public InfectionReported(@JsonProperty("sequenceNumber") Long sequenceNumber, @JsonProperty("personId") Long personId, @JsonProperty("city") String city, @JsonProperty("occurredOn") LocalDateTime occurredOn) {
+        super(UUID.randomUUID(), sequenceNumber, city, occurredOn);
         this.personId=personId;
     }
 
