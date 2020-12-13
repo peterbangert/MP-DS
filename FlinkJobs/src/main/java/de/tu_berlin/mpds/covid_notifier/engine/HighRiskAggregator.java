@@ -15,6 +15,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
@@ -41,6 +42,9 @@ public class HighRiskAggregator {
 
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        env.enableCheckpointing(1000000000L);
+        CheckpointConfig config = env.getCheckpointConfig();
+        config.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         Properties properties = new Properties();
 
         properties.setProperty("bootstrap.servers", "kafka:9092");

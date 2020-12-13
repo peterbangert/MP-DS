@@ -49,6 +49,7 @@ public class FlinkEngine {
     @Bean
     public StreamExecutionEnvironment env(){
        env=  StreamExecutionEnvironment.getExecutionEnvironment();
+        env.disableOperatorChaining();
        return env;
     }
     @Bean
