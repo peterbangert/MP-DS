@@ -116,7 +116,7 @@
 
 	<build>
 	<finalName>${project.artifactId}</finalName>
-	<plugins>
+	<!--<plugins>
 	<plugin>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-maven-plugin</artifactId>
@@ -138,7 +138,31 @@
 		<version>2.22.2</version>
 
 	</plugin>
-	</plugins>
+	</plugins>-->
+
+
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.2.4</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+							<configuration>
+								<transformers>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<mainClass>de.tu_berlin.mpds.covid_notifier.CovidNotifierApplication</mainClass>
+									</transformer>
+								</transformers>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
 
 	</build>
 
