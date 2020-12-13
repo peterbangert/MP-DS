@@ -66,7 +66,7 @@ public class FlinkEngine {
             try {
                 //Jedis jedis = new Jedis();
                 //Set<String> contacts = jedis.smembers(Long.toString(data.getPersonId()));
-                Set<String> contacts = Redis.getContacts(Long.toString(data.getPersonId()));
+                Set<String> contacts = PipelineRedis.getContacts(Long.toString(data.getPersonId()));
                 if (contacts != null) {
                     contacts.stream().forEach(contact -> out.collect(contact));
                 }
@@ -87,6 +87,8 @@ public class FlinkEngine {
         @Override
         public void processElement(String data, Context ctx, Collector<PersonContact> out) throws Exception {
             // emit Contacts to regular output
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
             DomainEvent domainEvent = objectMapper.readValue(data, DomainEvent.class);
             if (domainEvent instanceof PersonContact) {
                 out.collect((PersonContact) domainEvent);
@@ -131,7 +133,7 @@ public class FlinkEngine {
 
         contactStream
                 .map(data -> {
-                    return Redis.writeContact(
+                    return PipelineRedis.writeContact(
                             Long.toString(data.getPerson1()),
                             Long.toString(data.getPerson2()));
                 })
