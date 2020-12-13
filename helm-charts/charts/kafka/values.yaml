@@ -365,7 +365,10 @@ podLabels: {}
 ## Pod annotations. Evaluated as a template
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
-podAnnotations: {}
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "{{ .Values.metrics.jmx.service.port }}"
+  prometheus.io/path: "/metrics"
 
 ## Name of the priority class to be used by kafka pods, priority class needs to be created beforehand
 ## Ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
