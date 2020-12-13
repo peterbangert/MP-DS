@@ -25,6 +25,8 @@ data:
     high-availability.zookeeper.client.acl: open
     {{- end}}
 
+    metrics.latency.granularity: OPERATOR
+    metrics.latency.interval: 1000
     metrics.reporters: prom
     metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
     metrics.reporter.prom.port: 9999
