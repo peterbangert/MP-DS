@@ -28,16 +28,14 @@ kafka:
   ## configure cluster size
   replicas: 3
 
-  ## configure the NodePorts for external access
-  ## Ports in firstListenerPort  advertised.listeners must match
-  ## NodePorts = $(firstListenerPort + replicaNumber)
-  ## IMPORTANT: Update the external IP with an IP from the cluster
-  external:
-    firstListenerPort: 31090
-
-  configurationOverrides:
-    "advertised.listeners": |-
-      EXTERNAL://34.107.5.166:$((31090 + ${KAFKA_BROKER_ID}))
+  ## configure NodePorts for external access
+  ## Length must be the same as replicaCount
+  externalAccess:
+    service:
+      nodePorts:
+        - 31090
+        - 31091
+        - 31092
 
 #######################################
 ## Global variables for the redis chart
