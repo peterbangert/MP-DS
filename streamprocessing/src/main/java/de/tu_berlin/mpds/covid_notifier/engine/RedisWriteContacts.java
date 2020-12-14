@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
-public class Redis {
+public class RedisWriteContacts {
 
     public static class Connector implements Closeable {
 
@@ -23,7 +23,7 @@ public class Redis {
 
         private Connector() {
 
-            this.jedis = new Jedis("localhost", 6379, 1800);
+            this.jedis = new Jedis("redis", 6379, 1800);
         }
 
 
@@ -44,26 +44,7 @@ public class Redis {
 
         }
 
-        private LinkedHashSet<String> readContactSet(String personId) {
-            try {
-                LinkedHashSet<String> contacts = new LinkedHashSet<>( jedis.smembers(personId));
-                Pipeline expirationPipeline = jedis.pipelined();
-                contacts.stream().forEach(s -> expirationPipeline.get(personId + ":" + s));
-                List<Object> responses = expirationPipeline.syncAndReturnAll();
 
-                for (int i = 0; i < contacts.size(); i++) {
-                    if (responses.get(i) == null) {
-                        contacts.remove(i);
-                    }
-                }
-                return contacts;
-
-            } catch (Exception e) {
-                System.out.println("readContactSets: Jedis Issue : " + personId);
-                e.printStackTrace();
-                return null;
-            }
-        }
 
         public static synchronized Connector getInstance() {
             if (self == null) self = new Connector();
@@ -83,9 +64,7 @@ public class Redis {
         return connector.writeContacts(person1, person2);
     }
 
-    public static LinkedHashSet<String> getContacts(String personId) {
 
-        Connector connector = Connector.getInstance();
-        return connector.readContactSet(personId);
-    }
 }
+
+
