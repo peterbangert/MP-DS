@@ -8,6 +8,14 @@ import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
 
+/**
+ * <h1>Logical Grid of Simulation</h1>
+ * The grid is the root of all computations.
+ * It holds all constants.
+ * For performance reasons it is divided into bins.
+ * The bins hold a rectangular part of the grid.
+ */
+
 @Data
 public class GridBins {
 
@@ -35,6 +43,18 @@ public class GridBins {
     public static int roundHealed = 0;
 
     private final DomainEventPublisher domainEventPublisher;
+
+    /**
+     * @param domainEventPublisher The publisher through which all messages pass to kafka
+     * @param size Grid size, first coordinate amount of rows, second columns
+     * @param binSize First coordinate amount of rows in bin, second columns
+     * @param infectionDistance The Manhatten distance upto which an infection between two people occurs
+     * @param daysInfected The amount of days a person stays infected
+     * @param ticksPerDay The amount of logical ticks until one day is considered passed
+     * @param publishInfectionAfterXDays The amount of days until an infection is published after it happened
+     * @param minMilliSecPerRound The minimum amount milli-seconds that have to pass during each round
+     * @param saveRoundStats If round statistics are to be saved in csv
+     */
 
     public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, int infectionDistance, int daysInfected, int ticksPerDay, int publishInfectionAfterXDays, int minMilliSecPerRound, boolean saveRoundStats) {
         this.domainEventPublisher=domainEventPublisher;
@@ -219,6 +239,12 @@ public class GridBins {
     }
 */
 
+    /**
+     * Inserts a person into the right bin and thus into the grid.
+     * For
+     * @param person A person that holds appropriate coordinates for its position
+     */
+
     public void insertPerson(Person person){
 
         int row = person.getPos().getRow() / binSize.getRow();
@@ -250,6 +276,10 @@ public class GridBins {
         }*/
     }
 
+    /**
+     * The function to be called to simulate a round.
+     * @param time The current round
+     */
     public void iteration(long time){
 
         long startTime = System.nanoTime();
