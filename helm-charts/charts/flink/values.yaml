@@ -12,11 +12,11 @@ jobmanager:
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
-      memory: "1024Mi"
+      memory: "4096Mi"
     limits:
-      memory: "1024Mi"
+      memory: "4096Mi"
   ## jobmanager.memory.process.size in configmap
-  configMemory: "1024m"
+  configMemory: "4096m"
 
   ## Liveness (and eventually Readiness) probe values.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
@@ -33,11 +33,11 @@ taskmanager:
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
-      memory: "1024Mi"
+      memory: "4096Mi"
     limits:
-      memory: "1024Mi"
+      memory: "4096Mi"
   ## jobmanager.memory.process.size in configmap
-  configMemory: "1024m"
+  configMemory: "4096m"
 
   ## Liveness (and eventually Readiness) probe values.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
