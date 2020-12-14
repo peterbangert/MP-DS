@@ -34,3 +34,4 @@ simulator:
   daysInfected: 3
   publishInfectionAfterXdays: 1
   ticksPerDay: 30
+  minMilliSecPerRound: 500

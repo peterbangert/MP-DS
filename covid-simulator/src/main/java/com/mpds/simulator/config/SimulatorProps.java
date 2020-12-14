@@ -28,4 +28,6 @@ public class SimulatorProps {
     private int publishInfectionAfterXDays;
 
     private String city;
+
+    private int minMilliSecPerRound;
 }

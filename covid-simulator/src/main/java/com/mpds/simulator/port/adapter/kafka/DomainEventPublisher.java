@@ -25,8 +25,6 @@ public class DomainEventPublisher {
 
     private final ObjectMapper objectMapper;
 
-    private final SimpleDateFormat dateFormat;
-
     private final KafkaProducer<String, byte[]> producer;
 
     private final Callback performanceCallback;
@@ -57,12 +55,11 @@ public class DomainEventPublisher {
 
         performanceCallback = new PerformanceCallback();
         producer = new KafkaProducer<>(props);
-        dateFormat = new SimpleDateFormat("HH:mm:ss:SSS z dd MMM yyyy");
+
     }
 
     public void publishEvent(DomainEvent domainEvent){
-        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<String, byte[]>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), toBytes(domainEvent));
-//        Callback cb = stats.nextCompletion(sendStartMs, recordSize, stats);
+        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaProducerProps.getTopic(), domainEvent.getUuid().toString(), toBytes(domainEvent));
         this.producer.send(producerRecord, performanceCallback);
     }
 

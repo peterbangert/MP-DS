@@ -25,15 +25,12 @@ jib {
     }
     container {
         environment= [SPRING_PROFILES_ACTIVE:'qa']
-//        useCurrentTimestamp = true
     }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-//    implementation 'org.apache.kafka:kafka-streams'
-//    implementation 'org.springframework.kafka:spring-kafka'
     implementation 'io.projectreactor.kafka:reactor-kafka:1.1.0.RELEASE'
     compile group: 'it.unimi.dsi', name: 'dsiutils', version: '2.6.14'
     compileOnly 'org.projectlombok:lombok'
