@@ -17,6 +17,14 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * <h1>Logical Subunit of Grid</h1>
+ * Bins and their neighbouring bins can be considered independent logical units.
+ * They iterate through each person in the bin and calculate if it has any interactions with other people in the bin or the neighbours.
+ * Interactions include contact and infection events.
+ * The person is subsequently moved and possibly moved to a neighbouring bin.
+ */
+
 @Data
 @Slf4j
 public abstract class Bin {
@@ -28,6 +36,11 @@ public abstract class Bin {
 
     private final DomainEventPublisher domainEventPublisher;
 
+    /**
+     * @param domainEventPublisher The publisher object that holds the connection to kafka
+     * @param ulCorner The upper left corner coordinates of the bin
+     * @param lrCorner The lower right corner coordinates of the bin
+     */
     public Bin(DomainEventPublisher domainEventPublisher, Coordinate ulCorner, Coordinate lrCorner){
         this.domainEventPublisher=domainEventPublisher;
         this.ulCorner = ulCorner;
