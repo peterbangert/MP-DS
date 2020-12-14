@@ -114,7 +114,10 @@ public class FlinkEngine {
                 new SimpleStringSchema(),
                 properties);
         covidSource.setStartFromEarliest();
-        DataStream<String> covidStream = env.addSource(covidSource);
+
+        DataStream<DomainEvent> covidStream = env.addSource(covidSource)
+                .name("Covid Data");
+
 
         SimpleModule module = new SimpleModule();
         module.addDeserializer(DomainEvent.class, new DomainEventDeserializer());
