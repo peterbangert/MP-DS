@@ -235,7 +235,7 @@ class CovidSimulatorApplicationTests {
     public void smallTest(){
         Coordinate binSize = new Coordinate(4,4);
         Coordinate size = new Coordinate(30, 30);
-        GridBins grid = new GridBins(null, size, binSize, 4, 3, 10, 1, 5000, false);
+        GridBins grid = new GridBins(null, size, binSize, 4, 3, 10, 1, 500, false);
         grid.insertPerson(new Person(0, new Coordinate(0,0), (short) 30, (short) -1, (short) -1));
         grid.insertPerson(new Person(1, new Coordinate(1,0), (short) 0, (short) -1, (short) -1));
         grid.insertPerson(new Person(2, new Coordinate(1,1), (short) 0, (short) -1, (short) -1));

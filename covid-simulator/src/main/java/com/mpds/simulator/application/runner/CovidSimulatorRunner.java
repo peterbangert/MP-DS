@@ -29,7 +29,7 @@ public class CovidSimulatorRunner implements CommandLineRunner {
 
         Coordinate size = new Coordinate(this.simulatorProps.getGridRows(), this.simulatorProps.getGridColumns());
         Coordinate binSize = new Coordinate(this.simulatorProps.getBinRows(), this.simulatorProps.getBinColumns());
-        GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, this.simulatorProps.getInfectionDistance(), simulatorProps.getDaysInfected(), simulatorProps.getTicksPerDay(), simulatorProps.getPublishInfectionAfterXDays(), 5000, false);
+        GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, this.simulatorProps.getInfectionDistance(), simulatorProps.getDaysInfected(), simulatorProps.getTicksPerDay(), simulatorProps.getPublishInfectionAfterXDays(), 500, false);
 
         grid.insertPerson(new Person(0, null, (short) (this.simulatorProps.getDaysInfected() * simulatorProps.getTicksPerDay()), (short) 0, (short) 0));
 
