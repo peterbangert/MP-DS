@@ -95,8 +95,8 @@ public abstract class Bin {
 
     public void publishContact(long time, int id1, int id2){
         //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
-        //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(personContactEvent);
+        DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(personContactEvent);
         GridBins.roundContacts++;
 //        this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
     }
@@ -104,16 +104,16 @@ public abstract class Bin {
     public void publishInfection(long time, int id){
         //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
         //System.out.println("infection: " + String.valueOf(id));
-        //DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(domainEvent);
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
     public void publishHealed(long time, int id){
         //log.info("Person healed: " + id);
         //System.out.println("healed: " + id);
-        //DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(domainEvent);
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
         GridBins.roundHealed++;
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }

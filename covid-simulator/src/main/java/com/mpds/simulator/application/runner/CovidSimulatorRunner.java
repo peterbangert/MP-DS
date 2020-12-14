@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CovidSimulatorRunner implements CommandLineRunner {
 
-//    private final DomainEventPublisherReactive domainEventPublisherReactive;
-
     private final DomainEventPublisher domainEventPublisher;
 
     private final SimulatorProps simulatorProps;
@@ -42,7 +40,6 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         int time = 0;
         Stats.startTime=System.currentTimeMillis();
         while (true) {
-//            System.out.println("Current Sequence: " + SequenceManager.currentSequenceNumber);
             grid.iteration(time);
             time++;
         }
