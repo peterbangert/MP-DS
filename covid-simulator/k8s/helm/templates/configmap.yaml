@@ -27,3 +27,4 @@ data:
   PUBLISH_INFECTION_AFTER_X_DAYS: {{ $.Values.simulator.publishInfectionAfterXdays | quote }}
   TICKS_PER_DAY: {{ $.Values.simulator.ticksPerDay | quote }}
   MIN_MILLI_SEC_PER_ROUND: {{ .Values.simulator.minMilliSecPerRound | quote }}
+  INITIAL_INFECTED_PEOPLE: {{ .Values.simulator.initialInfectedPeople | quote }}

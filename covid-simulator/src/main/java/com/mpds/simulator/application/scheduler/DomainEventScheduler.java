@@ -13,6 +13,7 @@ public class DomainEventScheduler {
     private final DomainEventPublisherReactive domainEventPublisherReactive;
 
     //Comment this in to schedule event every 10seconds
+    // Will be used for later use cases
     //@Scheduled(fixedDelay = 10000)
     public void scheduleEvent(){
         log.info("Start scheduling event....");

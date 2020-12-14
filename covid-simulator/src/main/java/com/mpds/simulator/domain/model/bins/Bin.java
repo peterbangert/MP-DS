@@ -82,9 +82,6 @@ public abstract class Bin {
         return (ulCorner.getCol() - pos.getCol()) + GridBins.infectionDistance > 0;
     }
 
-    //public boolean sampleInfection(int distance){
-    //    return GridBins.randomGen.nextInt(GridBins.infectionDistance*2) > distance + 1;
-    //}
 
     public boolean sampleInfection(int distance){
         return true;
@@ -106,29 +103,39 @@ public abstract class Bin {
     }
 
 
-    public void publishContact(long time, int id1, int id2){
-        //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
+    /**
+     * Publish a PersonContact domain event to Kafka
+     * @param time The time within the simulator
+     * @param id1 The id of the first person
+     * @param id2 The id of the second person
+     */
+    private void publishContact(long time, int id1, int id2){
         DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         this.domainEventPublisher.publishEvent(personContactEvent);
         GridBins.roundContacts++;
-//        this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
     }
 
-    public void publishInfection(long time, int id){
-        //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
-        //System.out.println("infection: " + String.valueOf(id));
+    /**
+     * Publish a PersonInfected domain event to Kafka
+     * @param time The time within the simulator
+     * @param id The id of the infected person
+     */
+    private void publishInfection(long time, int id){
+        log.debug("Infected person:" + id);
         DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         this.domainEventPublisher.publishEvent(domainEvent);
-        //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
-    public void publishHealed(long time, int id){
-        //log.info("Person healed: " + id);
-        //System.out.println("healed: " + id);
+    /**
+     * Publish a PersonHealed domain event to Kafka
+     * @param time The time within the simulator
+     * @param id The id of the healed person
+     */
+    private void publishHealed(long time, int id){
+        log.debug("Person healed: " + id);
         DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
         this.domainEventPublisher.publishEvent(domainEvent);
         GridBins.roundHealed++;
-        //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
 
@@ -285,51 +292,6 @@ public abstract class Bin {
         }
         iterateRest(time, beforePerson, currentPerson);
     }
-
-    /*
-    public void iterate(){
-        Person currentPerson = people.getStart();
-        if(currentPerson != null){
-
-            Person nextNode = currentPerson.getNext();
-            findInteractions(currentPerson);
-
-            while (movePerson(currentPerson)){
-                people.setStart(nextNode);
-                if(nextNode == null){
-                    return;
-                }
-                currentPerson = nextNode;
-                nextNode = nextNode.getNext();
-            }
-            if (nextNode == null){
-                return;
-            }
-        } else {
-            return;
-        }
-
-        Person beforePerson = currentPerson;
-        currentPerson = currentPerson.getNext();
-        Person nextPerson = currentPerson.getNext();
-
-        while(nextPerson != null){
-            findInteractions(currentPerson);
-            if(movePerson(currentPerson)){
-                beforePerson.setNext(nextPerson);
-            }
-            beforePerson = currentPerson;
-            currentPerson = nextPerson;
-            nextPerson = currentPerson.getNext();
-        }
-        findInteractions(currentPerson);
-        if(movePerson(currentPerson)){
-            people.setEnd(beforePerson);
-            beforePerson.setNext(null);
-        }
-    }
-
-     */
 
     public void addNewPeople(){
         if(toBeAdded.getStart() == null){

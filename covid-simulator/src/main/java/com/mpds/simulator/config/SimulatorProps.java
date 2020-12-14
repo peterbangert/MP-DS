@@ -30,4 +30,6 @@ public class SimulatorProps {
     private String city;
 
     private int minMilliSecPerRound;
+
+    private long initialInfectedPeople;
 }

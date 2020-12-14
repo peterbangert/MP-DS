@@ -31,10 +31,11 @@ public class CovidSimulatorRunner implements CommandLineRunner {
         Coordinate binSize = new Coordinate(this.simulatorProps.getBinRows(), this.simulatorProps.getBinColumns());
         GridBins grid = new GridBins(this.domainEventPublisher, size, binSize, this.simulatorProps.getInfectionDistance(), simulatorProps.getDaysInfected(), simulatorProps.getTicksPerDay(), simulatorProps.getPublishInfectionAfterXDays(), simulatorProps.getMinMilliSecPerRound(), false);
 
-        grid.insertPerson(new Person(0, null, (short) (this.simulatorProps.getDaysInfected() * simulatorProps.getTicksPerDay()), (short) 0, (short) 0));
-
-        for(int i=1; i<this.simulatorProps.getNumberOfPeople(); i++){
-            grid.insertPerson(new Person(i, null, (short) 0, (short) -1, (short) -1));
+        for(int i=0; i<this.simulatorProps.getInitialInfectedPeople(); i++){
+            grid.insertPerson(new Person(i, null, (short) (this.simulatorProps.getDaysInfected() * simulatorProps.getTicksPerDay()), (short) -1, (short) -1));
+        }
+        for(int i = (int) this.simulatorProps.getInitialInfectedPeople(); i<this.simulatorProps.getNumberOfPeople(); i++){
+            grid.insertPerson(new Person(i, null, (short) -1, (short) -1, (short) -1));
         }
         // Run forever to imitate a never ending stream of events
         int time = 0;
