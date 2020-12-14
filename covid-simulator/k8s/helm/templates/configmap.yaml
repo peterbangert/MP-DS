@@ -24,5 +24,5 @@ data:
   SIMULATOR_INFECTION_DISTANCE: {{ .Values.simulator.infectionDistance | quote}}
   SIMULATOR_CITY: {{ .Values.simulator.city | quote}}
   SIMULATOR_DAYS_INFECTED: ${{ .Values.simulator.daysInfected | quote }}
-  PUBLISH_INFECTION_AFTER_X_DAYS: {{ $.Values.simulator.publishInfectionAfterXdays }}
-  TICKS_PER_DAY: {{ $.Values.simulator.ticksPerDay }}
+  PUBLISH_INFECTION_AFTER_X_DAYS: {{ $.Values.simulator.publishInfectionAfterXdays | quote }}
+  TICKS_PER_DAY: {{ $.Values.simulator.ticksPerDay | quote }}
