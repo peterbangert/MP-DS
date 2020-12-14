@@ -1,11 +1,21 @@
 # Flink Streaming Engine
 
-> Useful commands and howto's
+> Requirements, useful commands, and howto's
+
+## Requirements
+
+1. Access to Kafka instance
+   - see [kafka quickstart](https://kafka.apache.org/quickstart) 
+2. Access to Redis instance
+   - see [redis quickstart](https://redis.io/topics/quickstart)
+3. jdk-1.8
+   - see [open jdk install](https://openjdk.java.net/install/)
+
 
 ## Build the Jar
 - Navigate to the project directory
 
-        mvn clean package spring-boot:repackage
+        mvn clean package 
 
 ## Run the Jar
 - Navigate to the target directory
@@ -43,7 +53,7 @@
          redis-cli ping
         PONG
 
-- Check Hashmaps
+- Check Set
 
-         redis-cli hgetall key
+         redis-cli smembers key
 
