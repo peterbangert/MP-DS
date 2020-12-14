@@ -76,15 +76,16 @@ public class FlinkEngine {
         return properties;
     }
 
-    /**
-     * Infection Mapper
-     * @param  InfectionReported
-     * @return String
-     *
-     * Request contacts from Redis of set of contacts for personId from param
-     */
+
     public static class InfectionRedisMapper implements FlatMapFunction<InfectionReported, String> {
 
+        /**
+         * Infection Mapper
+         * @param  data 
+         * @return String
+         *
+         * Request contacts from Redis of set of contacts for personId from param
+         */
         @Override
         public void flatMap(InfectionReported data, Collector<String> out) throws Exception {
             try {
@@ -100,17 +101,19 @@ public class FlinkEngine {
         }
     }
 
-    /**
-     * DomainEventSplitter
-     * @param DomainEvent
-     * @return PersonContact
-     *
-     * Gathers PersonContact events into outgoing collector, places InfectionReported in context with tag
-     */
+
     public static class DomainEventSplitter extends ProcessFunction<DomainEvent, PersonContact> {
 
         final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
         };
+
+        /**
+         * DomainEventSplitter
+         * @param data
+         * @return PersonContact
+         *
+         * Gathers PersonContact events into outgoing collector, places InfectionReported in context with tag
+         */
 
         @Override
         public void processElement(DomainEvent data, Context ctx, Collector<PersonContact> out) throws Exception {
@@ -144,7 +147,7 @@ public class FlinkEngine {
                 "covid",
                 new DomainEventSchema(),
                 properties);
-        covidSource.setStartFromEarliest();
+       // covidSource.setStartFromEarliest();
 
         // 2. Add Kafka Consumer as environment source
         DataStream<DomainEvent> covidStream = env.addSource(covidSource)

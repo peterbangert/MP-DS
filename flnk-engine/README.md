@@ -8,8 +8,8 @@
    - see [kafka quickstart](https://kafka.apache.org/quickstart) 
 2. Access to Redis instance
    - see [redis quickstart](https://redis.io/topics/quickstart)
-3. jdk-1.8
-   - see [open jdk install](https://openjdk.java.net/install/)
+3. jdk-11
+   - see [open jdk install](https://openjdk.java.net/projects/jdk/11/)
 
 
 ## Build the Jar
