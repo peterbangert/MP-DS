@@ -264,9 +264,9 @@ class CovidSimulatorApplicationTests {
     public void watchBabyPurr(){
         Coordinate binSize = new Coordinate(50,50);
         Coordinate size = new Coordinate(5000, 5000);
-        GridBins grid = new GridBins(null, size, binSize, 6, 3, 30, 1);
+        GridBins grid = new GridBins(null, size, binSize, 6, 2, 20, 1);
 
-        grid.insertPerson(new Person(0, null, (short) 30, (short) -1, (short) -1));
+        grid.insertPerson(new Person(0, null, (short) GridBins.publishInfectionAtTime, (short) -1, (short) -1));
         // Inserting 12000 persons
 
         /*

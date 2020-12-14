@@ -21,7 +21,7 @@ public class SimulatorProps {
 
     private int infectionDistance;
 
-    private int DaysInfected;
+    private int daysInfected;
 
     private int ticksPerDay;
 

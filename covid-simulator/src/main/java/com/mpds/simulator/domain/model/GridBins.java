@@ -22,6 +22,7 @@ public class GridBins {
     public static XorShift1024StarPhiRandom randomGen;
     public static int ticksPerDay;
     public static int publishInfectionAfterXTicks;
+    public static int publishInfectionAtTime;
 
     public static int roundContacts = 0;
     public static int roundInfections = 0;
@@ -38,6 +39,9 @@ public class GridBins {
         this.infectionDistance = infectionDistance;
         this.infectionTime = daysInfected * ticksPerDay;
         this.publishInfectionAfterXTicks = publishInfectionAfterXDays * ticksPerDay;
+        publishInfectionAtTime = infectionTime + 1 - publishInfectionAfterXTicks;
+        //System.out.println(publishInfectionAtTime);
+
 
         int rowResidual = size.getRow() % binSize.getRow();
         int colResidual = size.getCol() % binSize.getCol();

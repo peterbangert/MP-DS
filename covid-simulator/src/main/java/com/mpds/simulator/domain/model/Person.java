@@ -43,7 +43,8 @@ public class Person {
     }
 
     public void decrementInfection(){
-        if (infected > 0) {infected--;}
+        if (infected > 0) {//System.out.println(String.format("before %d - after %d\n", infected, infected-1));
+        infected--;}
     }
 
     public boolean isAwake(int timeOfDay){
