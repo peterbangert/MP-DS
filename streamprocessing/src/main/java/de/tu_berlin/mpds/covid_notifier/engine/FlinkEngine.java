@@ -1,19 +1,15 @@
 package de.tu_berlin.mpds.covid_notifier.engine;
 
 
-import de.tu_berlin.mpds.covid_notifier.model.DomainEvent;
-import de.tu_berlin.mpds.covid_notifier.model.DomainEventDeserializer;
-import de.tu_berlin.mpds.covid_notifier.model.InfectionReported;
-import de.tu_berlin.mpds.covid_notifier.model.PersonContact;
+import de.tu_berlin.mpds.covid_notifier.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
@@ -45,13 +41,34 @@ public class FlinkEngine {
     final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
     };
 
-
+    /**
+     * StreamExecutionEnvironment
+     * @return StreamExecutionEnvironment
+     * Initialize streaming environment config:
+     *      - Fail Rate policy
+     *      - HDFS Checkpointing
+     *      - Disabling Chain Operations
+     */
     @Bean
     public StreamExecutionEnvironment env(){
-       env=  StreamExecutionEnvironment.getExecutionEnvironment();
+        env=  StreamExecutionEnvironment.getExecutionEnvironment();
         env.disableOperatorChaining();
-       return env;
+        env.enableCheckpointing(1000000000L);
+        CheckpointConfig config = env.getCheckpointConfig();
+        config.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        env.setRestartStrategy(RestartStrategies.failureRateRestart(
+                3, // max failures per interval
+                Time.of(5, TimeUnit.MINUTES), //time interval for measuring failure rate
+                Time.of(10, TimeUnit.SECONDS) // delay
+        ));
+        return env;
     }
+
+    /**
+     * Properties
+     * @return properties
+     * Kafka Configuration
+     */
     @Bean
     public Properties Properties() {
         properties.setProperty("bootstrap.servers", "kafka:9092");
@@ -59,15 +76,19 @@ public class FlinkEngine {
         return properties;
     }
 
-
+    /**
+     * Infection Mapper
+     * @param  InfectionReported
+     * @return String
+     *
+     * Request contacts from Redis of set of contacts for personId from param
+     */
     public static class InfectionRedisMapper implements FlatMapFunction<InfectionReported, String> {
 
         @Override
         public void flatMap(InfectionReported data, Collector<String> out) throws Exception {
             try {
-                //Jedis jedis = new Jedis();
-                //Set<String> contacts = jedis.smembers(Long.toString(data.getPersonId()));
-                Set<String> contacts = PipelineRedis.getContacts(Long.toString(data.getPersonId()));
+                Set<String> contacts = RedisReadContacts.getContacts(Long.toString(data.getPersonId()));
                 if (contacts != null) {
                     contacts.stream().forEach(contact -> out.collect(contact));
                 }
@@ -79,70 +100,73 @@ public class FlinkEngine {
         }
     }
 
-    public static class DomainEventSplitter extends ProcessFunction<String, PersonContact> {
+    /**
+     * DomainEventSplitter
+     * @param DomainEvent
+     * @return PersonContact
+     *
+     * Gathers PersonContact events into outgoing collector, places InfectionReported in context with tag
+     */
+    public static class DomainEventSplitter extends ProcessFunction<DomainEvent, PersonContact> {
 
         final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
         };
 
-
         @Override
-        public void processElement(String data, Context ctx, Collector<PersonContact> out) throws Exception {
+        public void processElement(DomainEvent data, Context ctx, Collector<PersonContact> out) throws Exception {
+
             // emit Contacts to regular output
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            DomainEvent domainEvent = objectMapper.readValue(data, DomainEvent.class);
-            if (domainEvent instanceof PersonContact) {
-                out.collect((PersonContact) domainEvent);
+            if (data instanceof PersonContact) {
+                out.collect((PersonContact) data);
             }
             // emit Infections to side output
-            if (domainEvent instanceof InfectionReported) {
-                ctx.output(this.outputTag, (InfectionReported) domainEvent);
+            if (data instanceof InfectionReported) {
+                ctx.output(this.outputTag, (InfectionReported) data);
             }
         }
     }
 
-
+    /**
+     * highRiskContactProducer
+     * @throws Exception
+     *
+     * 1. Initialize Kafka Consumer to topic 'covid' from earliest start. Desierialize to DomainEvent
+     * 2. Add Kafka Consumer as environment source
+     * 3. Split the Stream into PersonContact and InfectionReported streams
+     * 4. Process Contact Stream: write to Redis
+     * 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
+     */
     @Bean
     public void highRiskContactProducer() throws Exception {
-        env.setRestartStrategy(RestartStrategies.failureRateRestart(
-            3, // max failures per interval
-            Time.of(5, TimeUnit.MINUTES), //time interval for measuring failure rate
-            Time.of(10, TimeUnit.SECONDS) // delay
-        ));
-        FlinkKafkaConsumer<String> covidSource = new FlinkKafkaConsumer<>(
+
+        // 1. Initialize Kafka Consumer to topic 'covid' from earliest start. Desierialize to DomainEvent
+        FlinkKafkaConsumer<DomainEvent> covidSource = new FlinkKafkaConsumer<>(
                 "covid",
-                new SimpleStringSchema(),
+                new DomainEventSchema(),
                 properties);
         covidSource.setStartFromEarliest();
 
+        // 2. Add Kafka Consumer as environment source
         DataStream<DomainEvent> covidStream = env.addSource(covidSource)
                 .name("Covid Data");
 
-
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(DomainEvent.class, new DomainEventDeserializer());
-        objectMapper.registerModule(module);
-        objectMapper.registerModule(new JavaTimeModule());
-
-        final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
-        };
-
-
+        // 3. Split the Stream into PersonContact and InfectionReported streams
         SingleOutputStreamOperator<PersonContact> contactStream = covidStream
                 .process(new DomainEventSplitter());
-
 
         DataStream<InfectionReported> infectionsStream = contactStream
                 .getSideOutput(outputTag);
 
+        // 4. Process Contact Stream: write to Redis
         contactStream
                 .map(data -> {
-                    return PipelineRedis.writeContact(
+                    return RedisWriteContacts.writeContact(
                             Long.toString(data.getPerson1()),
                             Long.toString(data.getPerson2()));
                 })
                 .name("Contacts");
 
+        // 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
         infectionsStream
                 .flatMap(new InfectionRedisMapper())
                 .filter(Objects::nonNull)
@@ -151,6 +175,7 @@ public class FlinkEngine {
                 ))
                 .name("HighRisk");
 
+        // Execute
         env.execute("Covid Engine");
     }
 

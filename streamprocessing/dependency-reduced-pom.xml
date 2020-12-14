@@ -183,11 +183,11 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.test.skip>true</maven.test.skip>
-    <tomcat.version>8.0.30</tomcat.version>
-    <java.version>11</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <java.version>11</java.version>
+    <maven.test.skip>true</maven.test.skip>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <tomcat.version>8.0.30</tomcat.version>
   </properties>
 </project>
