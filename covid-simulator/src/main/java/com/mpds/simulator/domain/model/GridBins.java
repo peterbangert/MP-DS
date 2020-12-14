@@ -3,6 +3,7 @@ package com.mpds.simulator.domain.model;
 import com.mpds.simulator.domain.model.bins.*;
 import com.mpds.simulator.domain.model.bins.iterfirst.*;
 import com.mpds.simulator.domain.model.bins.itersecond.*;
+import com.mpds.simulator.domain.model.stats.SimulationStats;
 import com.mpds.simulator.port.adapter.kafka.DomainEventPublisher;
 import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
@@ -16,6 +17,11 @@ public class GridBins {
     private int binsPerRow;
     private int binsPerCol;
     private Bin[][] bins;
+    private int minMilliSecPerRound;
+    private boolean saveRoundStats;
+
+    private static SimulationStats stats;
+
     public static int infectionDistance;
     public static int infectionTime;
     public static Coordinate size;
@@ -27,11 +33,10 @@ public class GridBins {
     public static int roundContacts = 0;
     public static int roundInfections = 0;
     public static int roundHealed = 0;
-    public static int roundPeopleIterated = 0;
 
     private final DomainEventPublisher domainEventPublisher;
 
-    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, int infectionDistance, int daysInfected, int ticksPerDay, int publishInfectionAfterXDays) {
+    public GridBins(DomainEventPublisher domainEventPublisher, Coordinate size, Coordinate binSize, int infectionDistance, int daysInfected, int ticksPerDay, int publishInfectionAfterXDays, int minMilliSecPerRound, boolean saveRoundStats) {
         this.domainEventPublisher=domainEventPublisher;
         this.size = size;
         this.binSize = binSize;
@@ -39,9 +44,14 @@ public class GridBins {
         this.infectionDistance = infectionDistance;
         this.infectionTime = daysInfected * ticksPerDay;
         this.publishInfectionAfterXTicks = publishInfectionAfterXDays * ticksPerDay;
+        this.minMilliSecPerRound = minMilliSecPerRound;
+        this.saveRoundStats = saveRoundStats;
         publishInfectionAtTime = infectionTime + 1 - publishInfectionAfterXTicks;
         //System.out.println(publishInfectionAtTime);
 
+        if(saveRoundStats){
+            stats = new SimulationStats("./stats/simulation_stats.csv");
+        }
 
         int rowResidual = size.getRow() % binSize.getRow();
         int colResidual = size.getCol() % binSize.getCol();
@@ -241,6 +251,9 @@ public class GridBins {
     }
 
     public void iteration(long time){
+
+        long startTime = System.nanoTime();
+
         for(int r=0; r<binsPerRow; r+=2) {
             for (int c = 0; c < binsPerCol; c++) {
                 //bins[r][c].setTime(time);
@@ -254,15 +267,29 @@ public class GridBins {
             }
         }
 
-        for (int r=1; r<binsPerRow; r++) {
+        for (int r=0; r<binsPerRow; r++) {
             for (int c = 0; c < binsPerCol; c++) {
                 bins[r][c].addNewPeople();
             }
         }
-        System.out.println(String.format("Round %d - Time of Day %d:\ncontacts: %d\ninfections: %d\nhealed: %d\niterated through: %d\n", time, time%ticksPerDay, roundContacts, roundInfections, roundHealed, roundPeopleIterated));
+
+        long duration = (System.nanoTime() - startTime)/1000000;
+
+        if(duration < minMilliSecPerRound){
+            try {
+                Thread.sleep((long) ((minMilliSecPerRound -duration) * 0.98));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println(String.format("Round %d - Time of Day %d:\ncontacts: %d\ninfections: %d\nhealed: %d\nduration (ms): %d\n", time, time%ticksPerDay, roundContacts, roundInfections, roundHealed, duration));
+
+        if(saveRoundStats) {
+            stats.addRoundToFile(time, time % ticksPerDay, roundContacts, roundInfections, roundHealed, duration);
+        }
         roundContacts = 0;
         roundInfections = 0;
         roundHealed = 0;
-        roundPeopleIterated = 0;
     }
 }

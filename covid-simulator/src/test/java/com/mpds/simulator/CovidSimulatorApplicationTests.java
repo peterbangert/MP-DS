@@ -235,7 +235,7 @@ class CovidSimulatorApplicationTests {
     public void smallTest(){
         Coordinate binSize = new Coordinate(4,4);
         Coordinate size = new Coordinate(30, 30);
-        GridBins grid = new GridBins(null, size, binSize, 4, 3, 10, 1);
+        GridBins grid = new GridBins(null, size, binSize, 4, 3, 10, 1, 5000, false);
         grid.insertPerson(new Person(0, new Coordinate(0,0), (short) 30, (short) -1, (short) -1));
         grid.insertPerson(new Person(1, new Coordinate(1,0), (short) 0, (short) -1, (short) -1));
         grid.insertPerson(new Person(2, new Coordinate(1,1), (short) 0, (short) -1, (short) -1));
@@ -262,12 +262,11 @@ class CovidSimulatorApplicationTests {
 
     @Test
     public void watchBabyPurr(){
-        Coordinate binSize = new Coordinate(50,50);
-        Coordinate size = new Coordinate(5000, 5000);
-        GridBins grid = new GridBins(null, size, binSize, 6, 2, 20, 1);
+        Coordinate binSize = new Coordinate(20,20);
+        Coordinate size = new Coordinate(4000, 4000);
+        GridBins grid = new GridBins(null, size, binSize, 6, 2, 30, 1, 0, true);
 
         grid.insertPerson(new Person(0, null, (short) GridBins.publishInfectionAtTime, (short) -1, (short) -1));
-        // Inserting 12000 persons
 
         /*
         int j = 1;
@@ -278,7 +277,7 @@ class CovidSimulatorApplicationTests {
             }
         }*/
 
-        for(int i = 1; i < 2000000; i++){
+        for(int i = 1; i < 1000000; i++){
             grid.insertPerson(new Person(i, null, (short) 0, (short) -1, (short) -1));
         }
         /*
@@ -290,7 +289,7 @@ class CovidSimulatorApplicationTests {
 
 
         // Run 500 rounds
-        for(int i=0; i<500; i++){
+        for(int i=0; i<150; i++){
             //System.out.println("Iteration: " + String.valueOf(i));
             grid.iteration(i);
         }

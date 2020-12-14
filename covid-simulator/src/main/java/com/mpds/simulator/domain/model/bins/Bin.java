@@ -95,8 +95,8 @@ public abstract class Bin {
 
     public void publishContact(long time, int id1, int id2){
         //System.out.println("contact: " + String.valueOf(id1) + " - " + String.valueOf(id2));
-        //DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(personContactEvent);
+        DomainEvent personContactEvent = new PersonContact(time, (long) id1, (long) id2, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(personContactEvent);
         GridBins.roundContacts++;
 //        this.grid.getDomainEventPublisher().sendMessages(personContactEvent).subscribe();
     }
@@ -104,16 +104,16 @@ public abstract class Bin {
     public void publishInfection(long time, int id){
         //log.info("infection:" + infectedPerson.getId() + " - " + healthyPerson.getId());
         //System.out.println("infection: " + String.valueOf(id));
-        //DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(domainEvent);
+        DomainEvent domainEvent = new InfectionReported(time, (long) id, CovidSimulatorRunner.city,LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
 
     public void publishHealed(long time, int id){
         //log.info("Person healed: " + id);
         //System.out.println("healed: " + id);
-        //DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        //this.domainEventPublisher.publishEvent(domainEvent);
+        DomainEvent domainEvent = new PersonHealed(time, (long) id, CovidSimulatorRunner.city, LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        this.domainEventPublisher.publishEvent(domainEvent);
         GridBins.roundHealed++;
         //this.grid.getDomainEventPublisher().sendMessages(domainEvent).subscribe();
     }
@@ -122,7 +122,7 @@ public abstract class Bin {
     public void calcInteractions(long time, Person person1, Person person2){
 
         int timeOfDay = (int) (time % GridBins.ticksPerDay);
-        if (person1.isAwake(timeOfDay) && person2.isAwake(timeOfDay)){
+        if (person2.isAwake(timeOfDay)){
 
         int distance = person1.getPos().distanceTo(person2.getPos());
 
@@ -154,7 +154,6 @@ public abstract class Bin {
 
     public void findInteractions(long time, Person currentPerson){
 
-        GridBins.roundPeopleIterated++;
         Person iterNode = currentPerson.getNext();
         while (iterNode != null){
             calcInteractions(time, currentPerson, iterNode);
@@ -181,11 +180,11 @@ public abstract class Bin {
 
         checkHealthStatus(time, startPerson);
 
-        /*
+
         if (!startPerson.isAwake((int) (time % GridBins.ticksPerDay))){
             return startPerson;
         }
-         */
+
 
         Person nextPerson = startPerson.getNext();
 
@@ -201,9 +200,9 @@ public abstract class Bin {
             startPerson = nextPerson;
             checkHealthStatus(time, startPerson);
 
-            /*if (!startPerson.isAwake((int) (time % GridBins.ticksPerDay))){
+            if (!startPerson.isAwake((int) (time % GridBins.ticksPerDay))){
                 return startPerson;
-            }*/
+            }
 
             nextPerson = nextPerson.getNext();
             findInteractions(time, startPerson);
@@ -218,12 +217,12 @@ public abstract class Bin {
         while (nextPerson != null){
             checkHealthStatus(time, middlePerson);
 
-            /*if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
+            if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
                 beforePerson = middlePerson;
                 middlePerson = nextPerson;
                 nextPerson = nextPerson.getNext();
                 continue;
-            }*/
+            }
 
             findInteractions(time, middlePerson);
 
@@ -239,9 +238,9 @@ public abstract class Bin {
 
         checkHealthStatus(time, middlePerson);
 
-        /*if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
+        if (!middlePerson.isAwake((int) (time % GridBins.ticksPerDay))){
             return;
-        }*/
+        }
 
         findInteractions(time, middlePerson);
         if(movePerson(middlePerson)){
