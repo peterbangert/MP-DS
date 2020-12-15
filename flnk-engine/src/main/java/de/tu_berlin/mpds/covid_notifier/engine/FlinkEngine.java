@@ -1,6 +1,8 @@
 package de.tu_berlin.mpds.covid_notifier.engine;
 
 
+import de.tu_berlin.mpds.covid_notifier.metrics.InfectionCounter;
+import de.tu_berlin.mpds.covid_notifier.metrics.HighRiskCounter;
 import de.tu_berlin.mpds.covid_notifier.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -171,8 +173,10 @@ public class FlinkEngine {
 
         // 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
         infectionsStream
+                .map(new InfectionCounter())
                 .flatMap(new InfectionRedisMapper())
                 .filter(Objects::nonNull)
+                .map(new HighRiskCounter())
                 .addSink(new FlinkKafkaProducer<String>(
                         "highrisk", new SimpleStringSchema(), properties
                 ))
