@@ -31,8 +31,8 @@ simulator:
   binColumns: 50
   infectionDistance: 5
   city: Berlin
-  daysInfected: 20
+  daysInfected: 2
   publishInfectionAfterXdays: 1
-  ticksPerDay: 30
+  ticksPerDay: 60
   minMilliSecPerRound: 500
   initialInfectedPeople: 1
