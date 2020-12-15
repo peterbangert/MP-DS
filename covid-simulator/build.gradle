@@ -2,10 +2,11 @@ plugins {
     id 'org.springframework.boot' version '2.4.0'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
+    id 'com.google.cloud.tools.jib' version '2.7.0'
 }
 
 group = 'com.mpds'
-version = '0.0.1-SNAPSHOT'
+version = '2.0.0-SNAPSHOT-5'
 sourceCompatibility = '11'
 
 configurations {
@@ -18,11 +19,18 @@ repositories {
     mavenCentral()
 }
 
+jib {
+    to {
+        image = "eu.gcr.io/mpds-297011/covid-simulator:$version"
+    }
+    container {
+        environment= [SPRING_PROFILES_ACTIVE:'qa']
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-//    implementation 'org.apache.kafka:kafka-streams'
-//    implementation 'org.springframework.kafka:spring-kafka'
     implementation 'io.projectreactor.kafka:reactor-kafka:1.1.0.RELEASE'
     compile group: 'it.unimi.dsi', name: 'dsiutils', version: '2.6.14'
     compileOnly 'org.projectlombok:lombok'

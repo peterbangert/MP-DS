@@ -1,0 +1,5 @@
+apiVersion: v2
+name: covid-simulator
+description: COVID19 simulator chart used in MP-DS
+type: application
+version: 2.0.0-RELEASE

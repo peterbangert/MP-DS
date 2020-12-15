@@ -1,0 +1,38 @@
+app:
+  image:
+    repo: eu.gcr.io/mpds-297011/covid-simulator:0.0.1-SNAPSHOT
+    imagePullPolicy: Always
+  loggingLevel: INFO
+  port: 8080
+  quotas:
+  requests:
+    cpu: "500m"
+    memory: "1000Mi"
+  limits:
+    cpu: "1500m"
+    memory: "8500Mi"
+spring:
+  profile: qa
+kafka:
+  bootstrapServerHost: kafka
+  bootstrapServerPort: 9092
+  topic: covid
+  clientId: covid-simulator-1
+  acksConfig: 0
+  maxRequestSize: "256000"
+  bufferMemory: "33554432"
+  batchSize: "2048000"
+  lingerMs: 10
+simulator:
+  numberOfPeople: 30000
+  gridRows: 600
+  gridColumns: 600
+  binRows: 50
+  binColumns: 50
+  infectionDistance: 5
+  city: Berlin
+  daysInfected: 20
+  publishInfectionAfterXdays: 1
+  ticksPerDay: 30
+  minMilliSecPerRound: 500
+  initialInfectedPeople: 1

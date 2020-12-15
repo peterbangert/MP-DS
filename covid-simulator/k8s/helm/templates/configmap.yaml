@@ -1,0 +1,30 @@
+# k8s configmap for covid19-simulator
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  APP_PORT: {{ .Values.app.port | quote}}
+  LOGGING_LEVEL: {{ .Values.app.loggingLevel | quote}}
+  SPRING_PROFILES_ACTIVE: {{ .Values.spring.profile | quote}}
+  KAFKA_BOOTSTRAP_SERVER_HOST: {{ .Values.kafka.bootstrapServerHost | quote}}
+  KAFKA_BOOTSTRAP_SERVER_PORT: {{ .Values.kafka.bootstrapServerPort | quote}}
+  KAFKA_TOPIC: {{ .Values.kafka.topic | quote}}
+  KAFKA_CLIENT_ID: {{ .Values.kafka.clientId }}
+  KAFKA_ACKS_CONFIG: {{ .Values.kafka.acksConfig | quote}}
+  KAFKA_MAX_REQUEST_SIZE: {{ .Values.kafka.maxRequestSize | quote}}
+  KAFKA_BUFFER_MEMORY: {{ .Values.kafka.bufferMemory | quote}}
+  KAFKA_BATCH_SIZE: {{ .Values.kafka.batchSize | quote}}
+  KAFKA_LINGER_MS: {{ .Values.kafka.lingerMs | quote}}
+  SIMULATOR_NUMBER_OF_PEOPLE: {{ .Values.simulator.numberOfPeople | quote}}
+  SIMULATOR_GRID_ROWS: {{ .Values.simulator.gridRows | quote}}
+  SIMULATOR_GRID_COLUMNS: {{ .Values.simulator.gridColumns | quote}}
+  SIMULATOR_BIN_ROWS: {{ .Values.simulator.binRows | quote}}
+  SIMULATOR_BIN_COLUMNS: {{ .Values.simulator.binColumns | quote}}
+  SIMULATOR_INFECTION_DISTANCE: {{ .Values.simulator.infectionDistance | quote}}
+  SIMULATOR_CITY: {{ .Values.simulator.city | quote}}
+  SIMULATOR_DAYS_INFECTED: {{ .Values.simulator.daysInfected | quote}}
+  PUBLISH_INFECTION_AFTER_X_DAYS: {{ .Values.simulator.publishInfectionAfterXdays | quote }}
+  TICKS_PER_DAY: {{ .Values.simulator.ticksPerDay | quote }}
+  MIN_MILLI_SEC_PER_ROUND: {{ .Values.simulator.minMilliSecPerRound | quote }}
+  INITIAL_INFECTED_PEOPLE: {{ .Values.simulator.initialInfectedPeople | quote }}

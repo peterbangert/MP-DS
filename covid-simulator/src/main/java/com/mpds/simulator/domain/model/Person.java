@@ -1,31 +1,70 @@
 package com.mpds.simulator.domain.model;
 
-import it.unimi.dsi.util.XorShift1024StarPhiRandom;
 import lombok.Data;
 
+/**
+ * <h1>Status of a Person and it's Reference to the Next</h1>
+ * Every person holds a unique ID.
+ * A coordinate can be specified or if null chosen randomly.
+ * The infection status as well sleep phase are specified here.
+ * Moreover, each person can be part of a single linked list and thus it possesses a possible reference to a next person.
+ */
 @Data
 public class Person {
 
     private int id;
     private Coordinate pos;
     private int infected;
-    private XorShift1024StarPhiRandom randomGen;
-    private Coordinate gridSize;
-    private boolean reported;
+    private Person next;
+    private short asleep;
+    private short awake;
+    //private boolean reported;
 
-    public Person(int id, Coordinate position, int infected, Coordinate gridSize){
+    /**
+     * @param id Unique ID
+     * @param position Coordinate position on the grid
+     * @param infected How many ticks a person is to be considered infected
+     * @param asleep When a person goes to sleep in the day cycle
+     * @param awake When a person wakes up in the day cycle
+     */
+    public Person(int id, Coordinate position, short infected, short asleep, short awake){
         this.id = id;
-        this.gridSize = gridSize;
         pos = position;
         this.infected = infected;
-        reported = false;
-        randomGen = new XorShift1024StarPhiRandom();
+        //reported = false;
         if(position == null) {
-            pos = new Coordinate(randomGen.nextInt(gridSize.getRow()),
-                    randomGen.nextInt(gridSize.getCol()));
+            pos = new Coordinate(GridBins.randomGen.nextInt(GridBins.size.getRow()),
+                    GridBins.randomGen.nextInt(GridBins.size.getCol()));
         }
+
+        if(asleep == -1 && awake == -1){
+            short first = (short) GridBins.randomGen.nextInt((GridBins.ticksPerDay*3) / 5);
+            short second = (short) GridBins.randomGen.nextInt((GridBins.ticksPerDay*3) / 5);
+
+            if (first <= second){
+                this.asleep = first;
+                this.awake = second;
+            } else {
+                this.asleep = second;
+                this.awake = first;
+            }
+        }
+
+        //System.out.println(asleep);
+        //System.out.println(awake);
+        next = null;
     }
 
+    public void decrementInfection(){
+        if (infected > 0) {//System.out.println(String.format("before %d - after %d\n", infected, infected-1));
+        infected--;}
+    }
+
+    public boolean isAwake(int timeOfDay){
+        return timeOfDay >= awake || timeOfDay < asleep;
+    }
+
+    /*
     public void move(){
         int move = randomGen.nextInt(4);
         switch (move){
@@ -67,5 +106,5 @@ public class Person {
                 break;
 
         }
-    }
+    }*/
 }
