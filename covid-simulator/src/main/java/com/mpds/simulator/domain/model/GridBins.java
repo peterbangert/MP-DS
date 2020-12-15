@@ -313,7 +313,7 @@ public class GridBins {
             }
         }
 
-        System.out.println(String.format("Round %d - Time of Day %d:\ncontacts: %d\ninfections: %d\nhealed: %d\nduration (ms): %d\n", time, time%ticksPerDay, roundContacts, roundInfections, roundHealed, duration));
+//        System.out.println(String.format("Round %d - Time of Day %d:\ncontacts: %d\ninfections: %d\nhealed: %d\nduration (ms): %d\n", time, time%ticksPerDay, roundContacts, roundInfections, roundHealed, duration));
 
         if(saveRoundStats) {
             stats.addRoundToFile(time, time % ticksPerDay, roundContacts, roundInfections, roundHealed, duration);
