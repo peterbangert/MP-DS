@@ -1,14 +1,15 @@
 package de.tu_berlin.mpds.covid_notifier.engine;
 
 
-import de.tu_berlin.mpds.covid_notifier.metrics.InfectionCounter;
-import de.tu_berlin.mpds.covid_notifier.metrics.HighRiskCounter;
 import de.tu_berlin.mpds.covid_notifier.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.metrics.Counter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -79,7 +80,20 @@ public class FlinkEngine {
     }
 
 
-    public static class InfectionRedisMapper implements FlatMapFunction<InfectionReported, String> {
+    public static class InfectionRedisMapper extends RichFlatMapFunction<InfectionReported, String> {
+
+        private transient Counter infectionCounter;
+        private transient Counter highRiskCounter;
+
+        @Override
+        public void open(Configuration config) {
+            this.highRiskCounter = getRuntimeContext()
+                    .getMetricGroup()
+                    .counter("highRiskCounter");
+            this.infectionCounter = getRuntimeContext()
+                    .getMetricGroup()
+                    .counter("infectionCounter");
+        }
 
         /**
          * Infection Mapper
@@ -91,9 +105,13 @@ public class FlinkEngine {
         @Override
         public void flatMap(InfectionReported data, Collector<String> out) throws Exception {
             try {
+                infectionCounter.inc();
                 Set<String> contacts = RedisReadContacts.getContacts(Long.toString(data.getPersonId()));
                 if (contacts != null) {
-                    contacts.stream().forEach(contact -> out.collect(contact));
+                    contacts.stream().forEach(contact -> {
+                        highRiskCounter.inc();
+                        out.collect(contact);
+                    });
                 }
             } catch (Exception e) {
                 System.out.println("Infection exception reading data: " + data);
@@ -173,10 +191,8 @@ public class FlinkEngine {
 
         // 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
         infectionsStream
-                .map(new InfectionCounter())
                 .flatMap(new InfectionRedisMapper())
                 .filter(Objects::nonNull)
-                .map(new HighRiskCounter())
                 .addSink(new FlinkKafkaProducer<String>(
                         "highrisk", new SimpleStringSchema(), properties
                 ))
