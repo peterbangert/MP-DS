@@ -1,18 +1,18 @@
 package de.tu_berlin.mpds.covid_notifier.engine;
 
 
-import de.tu_berlin.mpds.covid_notifier.config.RedisConfig;
-import org.apache.kafka.common.protocol.types.Field;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Service
+@Slf4j
 public class Redis {
 
     public static class Connector implements Closeable {
@@ -26,7 +26,6 @@ public class Redis {
             this.jedis = new Jedis("localhost", 6379, 1800);
         }
 
-
         private int writeContacts(String person1, String person2) {
             try {
                 Pipeline contactPipeline = jedis.pipelined();
@@ -37,8 +36,7 @@ public class Redis {
                 contactPipeline.sync();
                 return 1;
             } catch (Exception e) {
-                System.out.println("writeContacts: Jedis Issue : " + person1 + ", " + person2);
-                e.printStackTrace();
+                log.error("writeContacts: Jedis Issue : " + person1 + ", " + person2, e);
                 return 0;
             }
 
@@ -59,8 +57,7 @@ public class Redis {
                 return contacts;
 
             } catch (Exception e) {
-                System.out.println("readContactSets: Jedis Issue : " + personId);
-                e.printStackTrace();
+                log.error("readContactSets: Jedis Issue : " + personId, e);
                 return null;
             }
         }

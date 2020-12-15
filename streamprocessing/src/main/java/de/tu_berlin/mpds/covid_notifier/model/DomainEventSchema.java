@@ -1,12 +1,18 @@
 package de.tu_berlin.mpds.covid_notifier.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.tu_berlin.mpds.covid_notifier.model.events.DomainEvent;
+import de.tu_berlin.mpds.covid_notifier.model.events.InfectionReported;
+import de.tu_berlin.mpds.covid_notifier.model.events.PersonContact;
+import de.tu_berlin.mpds.covid_notifier.model.events.PersonHealed;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 
+@Slf4j
 public class DomainEventSchema implements DeserializationSchema<DomainEvent> {
 
     static ObjectMapper objectMapper = new ObjectMapper()
@@ -25,7 +31,7 @@ public class DomainEventSchema implements DeserializationSchema<DomainEvent> {
                 return objectMapper.readValue(input, PersonHealed.class);
             }
         }catch (Exception ex) {
-            System.out.println("Could not deserialize the event from Kafka!" + ex);
+            log.error("Could not deserialize the event from Kafka!", ex);
 
         }
         return null;

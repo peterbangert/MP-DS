@@ -1,8 +1,15 @@
 package de.tu_berlin.mpds.covid_notifier.engine;
 
 
-import de.tu_berlin.mpds.covid_notifier.model.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import de.tu_berlin.mpds.covid_notifier.config.EngineProps;
+import de.tu_berlin.mpds.covid_notifier.config.KafkaProps;
+import de.tu_berlin.mpds.covid_notifier.config.RedisProps;
+import de.tu_berlin.mpds.covid_notifier.model.DomainEventSchema;
+import de.tu_berlin.mpds.covid_notifier.model.EngineConstants;
+import de.tu_berlin.mpds.covid_notifier.model.events.DomainEvent;
+import de.tu_berlin.mpds.covid_notifier.model.events.InfectionReported;
+import de.tu_berlin.mpds.covid_notifier.model.events.PersonContact;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -29,29 +36,41 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class FlinkEngine {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
+//    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    private  StreamExecutionEnvironment env;
+    private StreamExecutionEnvironment env;
 
     @Autowired
     private Properties properties;
 
-    final OutputTag<InfectionReported> outputTag = new OutputTag<InfectionReported>("InfectionReported") {
+    @Autowired
+    private KafkaProps kafkaProps;
+
+    @Autowired
+    private EngineProps engineProps;
+
+    @Autowired
+    private RedisProps redisProps;
+
+//    @Autowired
+//    private RedisService redisService;
+
+    final OutputTag<InfectionReported> INFECTION_OUTPUT_TAG = new OutputTag<InfectionReported>(EngineConstants.INFECTION_REPORTED_TAG_NAME) {
     };
 
     /**
      * StreamExecutionEnvironment
+     *
      * @return StreamExecutionEnvironment
      * Initialize streaming environment config:
-     *      - Fail Rate policy
-     *      - HDFS Checkpointing
-     *      - Disabling Chain Operations
+     * - Fail Rate policy
+     * - HDFS Checkpointing
+     * - Disabling Chain Operations
      */
     @Bean
-    public StreamExecutionEnvironment env(){
-        env=  StreamExecutionEnvironment.getExecutionEnvironment();
+    public StreamExecutionEnvironment env() {
+        env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.disableOperatorChaining();
         env.enableCheckpointing(1000000000L);
         CheckpointConfig config = env.getCheckpointConfig();
@@ -64,37 +83,29 @@ public class FlinkEngine {
         return env;
     }
 
-    /**
-     * Properties
-     * @return properties
-     * Kafka Configuration
-     */
-    @Bean
-    public Properties Properties() {
-        properties.setProperty("bootstrap.servers", "kafka:9092");
-        properties.setProperty("group.id", "covidAnalyser");
-        return properties;
-    }
 
     /**
      * Infection Mapper
-     * @param  InfectionReported
-     * @return String
      *
+     * @param InfectionReported
+     * @return String
+     * <p>
      * Request contacts from Redis of set of contacts for personId from param
      */
+    @Slf4j
     public static class InfectionRedisMapper implements FlatMapFunction<InfectionReported, String> {
 
         @Override
         public void flatMap(InfectionReported data, Collector<String> out) throws Exception {
             try {
                 Set<String> contacts = RedisReadContacts.getContacts(Long.toString(data.getPersonId()));
+//                Set<String> contacts = this.redisService.readContactSet(Long.toString(data.getPersonId()));
+//                Set<String> contacts = RedisReadContacts.getContacts(Long.toString(data.getPersonId()));
                 if (contacts != null) {
-                    contacts.stream().forEach(contact -> out.collect(contact));
+                    contacts.forEach(out::collect);
                 }
             } catch (Exception e) {
-                System.out.println("Infection exception reading data: " + data);
-                e.printStackTrace();
+                log.error("Infection exception reading data: ", e);
                 System.exit(0);
             }
         }
@@ -102,9 +113,10 @@ public class FlinkEngine {
 
     /**
      * DomainEventSplitter
+     *
      * @param DomainEvent
      * @return PersonContact
-     *
+     * <p>
      * Gathers PersonContact events into outgoing collector, places InfectionReported in context with tag
      */
     public static class DomainEventSplitter extends ProcessFunction<DomainEvent, PersonContact> {
@@ -128,55 +140,66 @@ public class FlinkEngine {
 
     /**
      * highRiskContactProducer
-     * @throws Exception
      *
-     * 1. Initialize Kafka Consumer to topic 'covid' from earliest start. Desierialize to DomainEvent
-     * 2. Add Kafka Consumer as environment source
-     * 3. Split the Stream into PersonContact and InfectionReported streams
-     * 4. Process Contact Stream: write to Redis
-     * 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
+     * @throws Exception 1. Initialize Kafka Consumer to topic 'covid' from earliest start. Desierialize to DomainEvent
+     *                   2. Add Kafka Consumer as environment source
+     *                   3. Split the Stream into PersonContact and InfectionReported streams
+     *                   4. Process Contact Stream: write to Redis
+     *                   5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
      */
     @Bean
     public void highRiskContactProducer() throws Exception {
 
+        // Read redis config
+        // TODO: To be optimized
+        RedisWriteContacts.redisHostname = redisProps.getHost();
+        RedisWriteContacts.redisPort = redisProps.getPort();
+        RedisWriteContacts.redisTimeout = redisProps.getTimeout();
+
+        RedisReadContacts.redisHostname = redisProps.getHost();
+        RedisReadContacts.redisPort = redisProps.getPort();
+        RedisReadContacts.redisTimeout = redisProps.getTimeout();
+
         // 1. Initialize Kafka Consumer to topic 'covid' from earliest start. Desierialize to DomainEvent
         FlinkKafkaConsumer<DomainEvent> covidSource = new FlinkKafkaConsumer<>(
-                "covid",
+                kafkaProps.getCovidTopic(),
                 new DomainEventSchema(),
                 properties);
         covidSource.setStartFromEarliest();
 
         // 2. Add Kafka Consumer as environment source
         DataStream<DomainEvent> covidStream = env.addSource(covidSource)
-                .name("Covid Data");
+                .name(EngineConstants.COVID_STREAM_NAME);
 
         // 3. Split the Stream into PersonContact and InfectionReported streams
         SingleOutputStreamOperator<PersonContact> contactStream = covidStream
                 .process(new DomainEventSplitter());
 
         DataStream<InfectionReported> infectionsStream = contactStream
-                .getSideOutput(outputTag);
+                .getSideOutput(INFECTION_OUTPUT_TAG);
 
         // 4. Process Contact Stream: write to Redis
         contactStream
+//                .map(data -> redisService.writeContacts(Long.toString(data.getPerson1()), Long.toString(data.getPerson2())))
                 .map(data -> {
                     return RedisWriteContacts.writeContact(
                             Long.toString(data.getPerson1()),
                             Long.toString(data.getPerson2()));
                 })
-                .name("Contacts");
+                .name(EngineConstants.CONTACT_STREAM_NAME);
 
         // 5. Process Infection Stream: Request Contact set from Redis, sink to Kafka topic 'highrisk'
         infectionsStream
                 .flatMap(new InfectionRedisMapper())
+//                .flatMap(new InfectionRedisMapper(redisService))
                 .filter(Objects::nonNull)
-                .addSink(new FlinkKafkaProducer<String>(
-                        "highrisk", new SimpleStringSchema(), properties
+                .addSink(new FlinkKafkaProducer<>(
+                        kafkaProps.getHighRiskTopic(), new SimpleStringSchema(), properties
                 ))
-                .name("HighRisk");
+                .name(kafkaProps.getHighRiskTopic());
 
         // Execute
-        env.execute("Covid Engine");
+        env.execute(engineProps.getJobName());
     }
 
 }

@@ -1,4 +1,4 @@
-package de.tu_berlin.mpds.covid_notifier.model;
+package de.tu_berlin.mpds.covid_notifier.model.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

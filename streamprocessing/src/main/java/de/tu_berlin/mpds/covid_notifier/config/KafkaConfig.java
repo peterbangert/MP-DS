@@ -1,24 +1,24 @@
 package de.tu_berlin.mpds.covid_notifier.config;
 
-import lombok.Data;
-import lombok.ToString;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.Properties;
 
 @Configuration
-@ConfigurationProperties(prefix = "kafka")
-@Data
-@ToString
-@EnableScheduling
 public class KafkaConfig {
 
-    private String bootstrapServer;
-
-    private String covidTopic;
-
-    private String highRiskTopic;
-
-    private String infectionsTopic;
+    /**
+     * Properties
+     *
+     * @return properties
+     * Kafka Configuration
+     */
+    @Bean
+    public Properties properties(Properties properties, KafkaProps kafkaProps) {
+        properties.setProperty("bootstrap.servers", kafkaProps.getBootstrapServer());
+        properties.setProperty("group.id", kafkaProps.getGroupId());
+        return properties;
+    }
 }
+

@@ -12,9 +12,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Data
 @ToString
 @EnableScheduling
-public class RedisConfig {
+public class RedisProps {
 
     private String host;
 
-    private String port;
+    private int port;
+
+    private int timeout;
 }
