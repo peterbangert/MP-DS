@@ -1,9 +1,14 @@
-# MP-DS
-Master Project Distributed System.
+# Covid-19 Contact Tracing DSP Solution
+
+> Master Project Distributed System, TU Berlin WiSe 2020/21
+
+
 
 ## Infrastructrue
 
-![Infrastructure](images/infrastructure.png)
+<p align="center">
+  <img width="600" height="300" src="images/infrastructure.png">
+</p>
 
 ### Create a Kubernetes cluster on Google Cloud
 
@@ -47,7 +52,12 @@ Uninstall the charts with:
 helm uninstall [DEPLOYMENT NAME]
 ```
 
+
 ### Viewing metrics in Grafana
+
+<p align="center">
+  <img width="460" height="300" src="images/grafana.png">
+</p>
 
 Grafana is accessible at <kubernetes_node_ip>:<nodeport>.
 The default nodeport is ``30080`` and the default username and password is ``admin``
@@ -59,3 +69,11 @@ Set the Url to ``prometheus:9090`` and click save and test. You should see a gre
 To import the premade grafana dashboard to show metrics, navigate to:
 ``Create > Import > Upload JSON file``
 Upload the ``grafana-dashboard.json`` file from the root directory.
+
+## Flink DSP Engine
+
+
+<p align="center">
+  <img width="460" height="300" src="images/pipeline.jpg">
+</p>
+
